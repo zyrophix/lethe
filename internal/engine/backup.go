@@ -68,18 +68,30 @@ func (b *Backup) Create(artifacts []module.Artifact, homeDir string) error {
 	return nil
 }
 
-var allowedRestorePrefixes = []string{
-	"/home/",
-	"/var/",
-	"/etc/",
-	"/tmp/",
-	"/usr/",
-	"/dev/shm/",
-	"/root/",
-	"/Users/",
-	"/Library/",
-	"/private/",
-	"C:/",
+func allowedRestorePrefixes() []string {
+	if runtime.GOOS == "windows" {
+		sd := os.Getenv("SystemDrive")
+		if sd == "" {
+			sd = "C:"
+		}
+		return []string{
+			sd + `\`,
+			os.TempDir() + `\`,
+		}
+	}
+	return []string{
+		"/home/",
+		"/var/",
+		"/etc/",
+		"/tmp/",
+		"/usr/",
+		"/dev/shm/",
+		"/root/",
+		"/Users/",
+		"/Library/",
+		"/private/",
+		"C:/",
+	}
 }
 
 func sanitizeRestorePath(name string) (string, error) {
@@ -87,11 +99,11 @@ func sanitizeRestorePath(name string) (string, error) {
 		return "", fmt.Errorf("path traversal rejected: %q", name)
 	}
 	cleaned := filepath.Clean(name)
-	if !strings.HasPrefix(cleaned, "/") {
+	if runtime.GOOS != "windows" && !strings.HasPrefix(cleaned, "/") {
 		cleaned = "/" + cleaned
 	}
 	allowed := false
-	for _, prefix := range allowedRestorePrefixes {
+	for _, prefix := range allowedRestorePrefixes() {
 		if strings.HasPrefix(cleaned, prefix) {
 			allowed = true
 			break

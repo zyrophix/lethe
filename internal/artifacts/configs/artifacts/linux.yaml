@@ -689,6 +689,70 @@
       risk: risky
       recursive: true
       description: "Evolution mail data"
+    - path: "{{.HomeDir}}/.config/Code/User/settings.json"
+      method: delete
+      risk: safe
+      description: "VS Code user settings"
+    - path: "{{.HomeDir}}/.config/Code/User/globalStorage/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code extension global storage"
+    - path: "{{.HomeDir}}/.config/Code/History/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code file edit history"
+    - path: "{{.HomeDir}}/.vscode"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code portable data"
+    - path: "{{.HomeDir}}/.vscode-server"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code remote server data"
+    - path: "{{.HomeDir}}/.config/JetBrains/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "JetBrains IDE config"
+    - path: "{{.HomeDir}}/.cache/JetBrains/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "JetBrains IDE cache"
+    - path: "{{.HomeDir}}/.java/.userPrefs"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Java user preferences"
+    - path: "{{.HomeDir}}/.vagrant.d/data/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Vagrant machine data"
+    - path: "{{.HomeDir}}/.vagrant.d/tmp/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Vagrant temp files"
+    - path: "{{.HomeDir}}/.volatility3"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Volatility 3 cache and history"
+    - path: "{{.HomeDir}}/.local/share/baloo"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "KDE Baloo search index"
+    - path: "{{.HomeDir}}/.local/share/krunner"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "KDE runner history"
 
 - module: package
   risk: safe

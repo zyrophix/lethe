@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 func detectLinux() Distro {
@@ -25,9 +26,19 @@ var isRoot = func() bool {
 }
 
 // ShredWarning returns a message when secure overwrite is ineffective on the
-// current storage, or "" when shred works as advertised. Non-Linux returns "".
+// current storage, or "" when shred works as advertised.
 func ShredWarning() string {
-	return ""
+	var reasons []string
+	if SSD() {
+		reasons = append(reasons, "SSD with wear-leveling")
+	}
+	if CoW() {
+		reasons = append(reasons, "copy-on-write filesystem")
+	}
+	if len(reasons) == 0 {
+		return ""
+	}
+	return "shred is ineffective on " + strings.Join(reasons, " and ")
 }
 
 var SSD = func() bool {

@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -142,14 +143,22 @@ func TestBackupEmptyArtifacts(t *testing.T) {
 }
 
 func TestSanitizeRestorePath(t *testing.T) {
+	validHome := "/home/user/file.txt"
+	validTemp := filepath.Join(os.TempDir(), "file.txt")
+	validSystem := "/var/log/syslog"
+	if runtime.GOOS == "windows" {
+		validHome = filepath.Join(os.Getenv("SystemDrive"), `\Users\user`, "file.txt")
+		validSystem = filepath.Join(os.Getenv("SystemDrive"), "Windows", "Temp", "file.txt")
+	}
+
 	tests := []struct {
 		name    string
 		input   string
 		wantErr bool
 	}{
-		{"valid home", "/home/user/file.txt", false},
-		{"valid tmp", "/tmp/file.txt", false},
-		{"valid var", "/var/log/syslog", false},
+		{"valid temp", validTemp, false},
+		{"valid system", validSystem, false},
+		{"valid home", validHome, false},
 		{"traversal", "../../etc/passwd", true},
 		{"outside prefix", "/opt/data", true},
 		{"single dotdot", "/home/../etc/passwd", true},

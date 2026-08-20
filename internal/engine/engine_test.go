@@ -241,7 +241,7 @@ func TestRunRiskPolicyFiltering(t *testing.T) {
 	mod := &mockModule{
 		name:      "testmod",
 		riskLevel: risk.RiskSafe,
-		platforms: []string{"linux"},
+		platforms: []string{module.CurrentPlatform()},
 		artifacts: []module.Artifact{
 			{Path: safePath, Method: "truncate", Risk: "safe"},
 			{Path: riskyPath, Method: "truncate", Risk: "risky"},
