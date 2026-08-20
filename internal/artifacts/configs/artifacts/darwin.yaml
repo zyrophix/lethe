@@ -92,6 +92,40 @@
       method: truncate
       risk: safe
       description: "Application firewall log"
+    - path: "{{.HomeDir}}/Library/Application Support/Code/User/settings.json"
+      method: delete
+      risk: safe
+      description: "VS Code user settings"
+    - path: "{{.HomeDir}}/Library/Application Support/Code/User/History/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code file edit history"
+    - path: "{{.HomeDir}}/Library/Application Support/Code/logs/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code logs"
+    - path: "{{.HomeDir}}/Library/Application Support/JetBrains/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "JetBrains IDE config"
+    - path: "{{.HomeDir}}/Library/Caches/JetBrains/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "JetBrains IDE cache"
+    - path: "{{.HomeDir}}/.vagrant.d/data/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Vagrant machine data"
+    - path: "{{.HomeDir}}/.vagrant.d/tmp/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Vagrant temp files"
 
 - module: audit
   risk: risky

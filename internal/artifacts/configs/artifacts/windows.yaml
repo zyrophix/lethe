@@ -31,6 +31,40 @@
       risk: safe
       recursive: true
       description: "IE/Edge browsing history"
+    - path: "{{.AppData}}/Code/User/settings.json"
+      method: delete
+      risk: safe
+      description: "VS Code user settings"
+    - path: "{{.AppData}}/Code/User/History/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code file edit history"
+    - path: "{{.AppData}}/Code/logs/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VS Code logs"
+    - path: "{{.LocalAppData}}/JetBrains/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "JetBrains IDE data"
+    - path: "{{.AppData}}/JetBrains/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "JetBrains IDE config"
+    - path: "{{.UserProfile}}/.vagrant.d/data/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Vagrant machine data"
+    - path: "{{.UserProfile}}/.vagrant.d/tmp/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Vagrant temp files"
 
 - module: registry
   risk: destructive
