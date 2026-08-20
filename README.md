@@ -4,7 +4,7 @@ Cross-platform anti-forensics trace cleaner with risk-gated operations. Written 
 
 ## Features
 
-- **34 modules, 299 artifacts** across Linux (20), macOS (7), and Windows (7)
+- **36 modules, 325 artifacts** across Linux (234), macOS (43), and Windows (48)
 - **Risk gating**: every operation is classified `safe` / `risky` / `destructive` and filtered by `--max-risk`
 - **Backup/restore**: tar archive with path-traversal protection before destructive changes
 - **SQLite scrubbing**: DELETE + VACUUM, pure-Go driver (no CGO)
@@ -18,6 +18,16 @@ Cross-platform anti-forensics trace cleaner with risk-gated operations. Written 
 - Static binary (~7.4MB), cross-compiled for 5 platforms, no dependencies
 
 ## Install
+
+```sh
+go install github.com/zyrophix/lethe@latest
+# or a pinned version:
+go install github.com/zyrophix/lethe@v0.2.0
+```
+
+Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
+
+From source:
 
 ```sh
 make build        # static binary at ./lethe

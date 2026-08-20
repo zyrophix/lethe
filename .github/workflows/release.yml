@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.3"
+
+      - name: Set release version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Cross-compile
+        run: make cross-compile
+
+      - name: Package binaries
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          mkdir -p dist/archives
+          for f in dist/lethe-*; do
+            name="$(basename "$f")"
+            os="${name#lethe-}"
+            os="${os%-*}"
+            if [ "$os" = "windows" ]; then
+              (cd dist && zip -q "archives/lethe-${VERSION}-${os}-${os##*-}.zip" "$name")
+            else
+              tar -C dist -czf "dist/archives/lethe-${VERSION}-${name#lethe-}.tar.gz" "$name"
+            fi
+          done
+          (cd dist/archives && sha256sum * > SHA256SUMS)
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/archives/*
+          generate_release_notes: true
