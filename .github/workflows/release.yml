@@ -34,8 +34,9 @@ jobs:
             name="$(basename "$f")"
             os="${name#lethe-}"
             os="${os%-*}"
+            arch="${name##*-}"
             if [ "$os" = "windows" ]; then
-              (cd dist && zip -q "archives/lethe-${VERSION}-${os}-${os##*-}.zip" "$name")
+              (cd dist && zip -q "archives/lethe-${VERSION}-${os}-${arch}.zip" "$name")
             else
               tar -C dist -czf "dist/archives/lethe-${VERSION}-${name#lethe-}.tar.gz" "$name"
             fi
