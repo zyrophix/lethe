@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 	_ "modernc.org/sqlite"
 )
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 	"golang.org/x/sys/windows/registry"
 )
 

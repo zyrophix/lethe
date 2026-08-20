@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 )
 
 type Backup struct {

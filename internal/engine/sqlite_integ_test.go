@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 )
 
 func TestSQLiteDeleteRows(t *testing.T) {

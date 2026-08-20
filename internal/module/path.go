@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/lethe/lethe/internal/platform"
+	"github.com/zyrophix/lethe/internal/platform"
 )
 
 func ResolvePath(path, homeDir string) string {

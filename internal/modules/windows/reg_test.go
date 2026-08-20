@@ -3,7 +3,7 @@ package windows
 import (
 	"testing"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 )
 
 func TestNewModulesRegistered(t *testing.T) {

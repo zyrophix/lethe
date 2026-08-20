@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 func TestTextWriterInfo(t *testing.T) {

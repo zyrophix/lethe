@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/lethe/lethe/internal/artifacts"
-	"github.com/lethe/lethe/internal/module"
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/artifacts"
+	"github.com/zyrophix/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 // execCommand is injectable for tests.

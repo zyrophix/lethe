@@ -3,7 +3,7 @@ package artifacts
 import (
 	"testing"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 )
 
 func TestLoadAllPlatforms(t *testing.T) {

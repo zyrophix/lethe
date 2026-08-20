@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 	"gopkg.in/yaml.v3"
 )
 

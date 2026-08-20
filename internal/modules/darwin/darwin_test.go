@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 )
 
 type cmdRecorder struct {

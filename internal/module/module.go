@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 type CleanMethod int

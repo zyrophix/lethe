@@ -5,7 +5,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/lethe/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/module"
 )
 
 func cleanRegistry(a module.Artifact, dryRun bool) error {

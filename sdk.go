@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lethe/lethe/internal/engine"
-	"github.com/lethe/lethe/internal/module"
-	"github.com/lethe/lethe/internal/modules/darwin"
-	"github.com/lethe/lethe/internal/modules/linux"
-	"github.com/lethe/lethe/internal/modules/windows"
-	"github.com/lethe/lethe/internal/output"
-	"github.com/lethe/lethe/internal/platform"
-	"github.com/lethe/lethe/internal/risk"
-	"github.com/lethe/lethe/internal/shred"
+	"github.com/zyrophix/lethe/internal/engine"
+	"github.com/zyrophix/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/modules/darwin"
+	"github.com/zyrophix/lethe/internal/modules/linux"
+	"github.com/zyrophix/lethe/internal/modules/windows"
+	"github.com/zyrophix/lethe/internal/output"
+	"github.com/zyrophix/lethe/internal/platform"
+	"github.com/zyrophix/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/shred"
 )
 
 // Options configures a clean run.

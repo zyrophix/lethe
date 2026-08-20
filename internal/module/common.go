@@ -1,7 +1,7 @@
 package module
 
 import (
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 type BaseModule struct {

@@ -14,12 +14,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lethe/lethe/internal/module"
-	"github.com/lethe/lethe/internal/output"
-	"github.com/lethe/lethe/internal/platform"
-	"github.com/lethe/lethe/internal/risk"
-	"github.com/lethe/lethe/internal/shred"
-	"github.com/lethe/lethe/internal/xattr"
+	"github.com/zyrophix/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/output"
+	"github.com/zyrophix/lethe/internal/platform"
+	"github.com/zyrophix/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/shred"
+	"github.com/zyrophix/lethe/internal/xattr"
 )
 
 type Stats struct {

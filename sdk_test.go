@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lethe/lethe/internal/output"
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/output"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 func TestShredFileRemovesFile(t *testing.T) {

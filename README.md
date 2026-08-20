@@ -79,7 +79,7 @@ Operations above `--max-risk` are skipped, never auto-approved.
 ## Go SDK
 
 ```go
-import "github.com/lethe/lethe"
+import "github.com/zyrophix/lethe"
 
 res, err := lethe.Clean(lethe.Options{DryRun: true, MaxRisk: risk.RiskRisky})
 ok, err := lethe.Verify(risk.RiskSafe, nil)

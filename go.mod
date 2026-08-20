@@ -1,4 +1,4 @@
-module github.com/lethe/lethe
+module github.com/zyrophix/lethe
 
 go 1.26.3
 

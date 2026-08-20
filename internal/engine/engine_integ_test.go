@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lethe/lethe/internal/module"
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 func TestEngineRunWithMockModule(t *testing.T) {

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/lethe/lethe/internal/cli"
+	"github.com/zyrophix/lethe/internal/cli"
 )
 
 func main() {

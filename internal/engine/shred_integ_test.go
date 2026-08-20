@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lethe/lethe/internal/module"
-	"github.com/lethe/lethe/internal/risk"
+	"github.com/zyrophix/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/risk"
 )
 
 func TestShredFileGone(t *testing.T) {
