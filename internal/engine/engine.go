@@ -377,7 +377,7 @@ func wipeFreeSpace(dir string, maxBytes int64) (int64, error) {
 		return 0, err
 	}
 	filler := f.Name()
-	defer os.Remove(filler)
+	defer func() { _ = os.Remove(filler) }()
 
 	random := platform.SSD()
 	buf := make([]byte, 1<<20)

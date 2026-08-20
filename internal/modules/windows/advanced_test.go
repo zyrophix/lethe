@@ -105,8 +105,8 @@ func TestPagefileCleanRunsCommand(t *testing.T) {
 	}
 	defer func() { execCommand = orig }()
 
-	os.Setenv("SystemRoot", `C:\Windows`)
-	defer os.Unsetenv("SystemRoot")
+	_ = os.Setenv("SystemRoot", `C:\Windows`)
+	defer func() { _ = os.Unsetenv("SystemRoot") }()
 
 	if err := pagefileClean(module.Context{}); err != nil {
 		t.Fatalf("pagefileClean: %v", err)

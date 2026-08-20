@@ -19,7 +19,7 @@ func cleanSQLite(a module.Artifact, resolved string, dryRun bool) error {
 	if err != nil {
 		return fmt.Errorf("open sqlite: %w", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	table := a.SQLiteTable
 	if table == "" {

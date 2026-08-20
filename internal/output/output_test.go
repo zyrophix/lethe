@@ -263,17 +263,17 @@ func TestJSONWriterDryRunFlag(t *testing.T) {
 func TestSupportsColor(t *testing.T) {
 	origTerm, origColor := os.Getenv("TERM"), os.Getenv("COLORTERM")
 	defer func() {
-		os.Setenv("TERM", origTerm)
-		os.Setenv("COLORTERM", origColor)
+		_ = os.Setenv("TERM", origTerm)
+		_ = os.Setenv("COLORTERM", origColor)
 	}()
 
-	os.Setenv("COLORTERM", "")
-	os.Setenv("TERM", "xterm-256color")
+	_ = os.Setenv("COLORTERM", "")
+	_ = os.Setenv("TERM", "xterm-256color")
 	if !supportsColor() {
 		t.Error("xterm should support color")
 	}
 
-	os.Setenv("TERM", "dumb")
+	_ = os.Setenv("TERM", "dumb")
 	if supportsColor() {
 		t.Error("dumb terminal should not support color")
 	}

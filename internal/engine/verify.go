@@ -140,10 +140,10 @@ func verifySQLite(a module.Artifact, paths []string) VerifyResult {
 
 		var count int
 		if err := db.QueryRow(query).Scan(&count); err != nil {
-			db.Close()
+			_ = db.Close()
 			return VerifyResult{Artifact: a, Cleaned: false, Reason: fmt.Sprintf("query failed: %v", err)}
 		}
-		db.Close()
+		_ = db.Close()
 
 		if count > 0 {
 			return VerifyResult{Artifact: a, Cleaned: false, Reason: fmt.Sprintf("%d rows remaining in %s", count, table)}

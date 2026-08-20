@@ -53,7 +53,7 @@ func (b *Backup) Create(artifacts []module.Artifact, homeDir string) error {
 	defer f.Close()
 
 	tw := tar.NewWriter(f)
-	defer tw.Close()
+	defer func() { _ = tw.Close() }()
 
 	var archiveErrors []error
 	for _, p := range paths {

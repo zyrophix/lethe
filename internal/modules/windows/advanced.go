@@ -45,6 +45,6 @@ func pagefileClean(ctx module.Context) error {
 		return err
 	}
 	pagefile := filepath.Join(os.Getenv("SystemRoot"), "pagefile.sys")
-	os.Remove(pagefile)
+	_ = os.Remove(pagefile)
 	return nil
 }

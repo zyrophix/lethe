@@ -1,4 +1,7 @@
+version: "2"
+
 linters:
+  default: none
   enable:
     - errcheck
     - govet
@@ -6,13 +9,19 @@ linters:
     - ineffassign
     - unused
     - misspell
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - "(*os.File).Close"
+        - "(*tar.Writer).Close"
+        - "(*tar.Reader).Close"
+
+formatters:
+  enable:
     - gofmt
 
 run:
   timeout: 5m
-
-issues:
-  exclude-rules:
-    - linters:
-        - errcheck
-      source: "defer .*Close\\(\\)"

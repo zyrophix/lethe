@@ -96,7 +96,7 @@ func TestStatsConcurrent(t *testing.T) {
 
 func TestCleanArtifactTruncate(t *testing.T) {
 	path := tmpFile(t, "sensitive data")
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	w := &mockWriter{}
 	reg := module.NewRegistry()
@@ -146,7 +146,7 @@ func TestCleanArtifactDeleteRecursive(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(sub, "file.txt"), []byte("data"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(dir)
+	defer func() { _ = os.RemoveAll(dir) }()
 
 	w := &mockWriter{}
 	reg := module.NewRegistry()
@@ -163,7 +163,7 @@ func TestCleanArtifactDeleteRecursive(t *testing.T) {
 
 func TestCleanArtifactDryRun(t *testing.T) {
 	path := tmpFile(t, "data")
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	w := &mockWriter{}
 	reg := module.NewRegistry()
@@ -183,7 +183,7 @@ func TestCleanArtifactDryRun(t *testing.T) {
 
 func TestCleanArtifactShred(t *testing.T) {
 	path := tmpFile(t, "sensitive data that needs shredding")
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	w := &mockWriter{}
 	reg := module.NewRegistry()
@@ -201,7 +201,7 @@ func TestCleanArtifactShred(t *testing.T) {
 
 func TestCleanArtifactExclude(t *testing.T) {
 	dir := tmpDir(t)
-	defer os.RemoveAll(dir)
+	defer func() { _ = os.RemoveAll(dir) }()
 	keep := filepath.Join(dir, "important.log")
 	junk := filepath.Join(dir, "junk.log")
 	if err := os.WriteFile(keep, []byte("keep"), 0644); err != nil {
@@ -231,9 +231,9 @@ func TestRunRiskPolicyFiltering(t *testing.T) {
 	safePath := tmpFile(t, "safe data")
 	riskyPath := tmpFile(t, "risky data")
 	destructivePath := tmpFile(t, "destructive data")
-	defer os.Remove(safePath)
-	defer os.Remove(riskyPath)
-	defer os.Remove(destructivePath)
+	defer func() { _ = os.Remove(safePath) }()
+	defer func() { _ = os.Remove(riskyPath) }()
+	defer func() { _ = os.Remove(destructivePath) }()
 
 	w := &mockWriter{}
 	reg := module.NewRegistry()

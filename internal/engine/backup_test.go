@@ -43,8 +43,8 @@ func TestBackupCreateAndRestore(t *testing.T) {
 		t.Fatal("backup tar should exist")
 	}
 
-	os.Remove(filepath.Join(srcDir, "file1.txt"))
-	os.Remove(filepath.Join(srcDir, "file2.txt"))
+	_ = os.Remove(filepath.Join(srcDir, "file1.txt"))
+	_ = os.Remove(filepath.Join(srcDir, "file2.txt"))
 
 	if _, err := os.Stat(filepath.Join(srcDir, "file1.txt")); !os.IsNotExist(err) {
 		t.Fatal("file1 should be removed before restore")
@@ -99,8 +99,8 @@ func TestBackupPathTraversalRejection(t *testing.T) {
 	if _, err := tw.Write([]byte("evil")); err != nil {
 		t.Fatal(err)
 	}
-	tw.Close()
-	f.Close()
+	_ = tw.Close()
+	_ = f.Close()
 
 	b := &Backup{Dir: tarPath[:len(tarPath)-4]}
 	if err := b.Create(nil, ""); err != nil {

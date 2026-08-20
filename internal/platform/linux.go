@@ -73,7 +73,7 @@ var CoW = func() bool {
 		return false
 	}
 	if c, ok := r.(io.Closer); ok {
-		defer c.Close()
+		defer func() { _ = c.Close() }()
 	}
 
 	scanner := bufio.NewScanner(r)
@@ -102,7 +102,7 @@ func UserHomes(homeDir string) []string {
 		return []string{homeDir}
 	}
 	if c, ok := r.(io.Closer); ok {
-		defer c.Close()
+		defer func() { _ = c.Close() }()
 	}
 
 	homes := parsePasswdHomes(r)

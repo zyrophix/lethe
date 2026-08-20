@@ -17,7 +17,7 @@ func createSQLiteTestDB(t *testing.T, path, table string, rows int) {
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	if _, err := db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY, data TEXT)", quoteIdentifier(table))); err != nil {
 		t.Fatalf("create table: %v", err)
@@ -31,7 +31,7 @@ func createSQLiteTestDB(t *testing.T, path, table string, rows int) {
 
 func TestVerifyTruncateEmpty(t *testing.T) {
 	path := tmpFile(t, "")
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	artifacts := []module.Artifact{
 		{Path: path, Method: "truncate", Risk: "safe"},
@@ -47,7 +47,7 @@ func TestVerifyTruncateEmpty(t *testing.T) {
 
 func TestVerifyTruncateWithContent(t *testing.T) {
 	path := tmpFile(t, "sensitive data")
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	artifacts := []module.Artifact{
 		{Path: path, Method: "truncate", Risk: "safe"},
@@ -70,7 +70,7 @@ func TestVerifyDeletedFileGone(t *testing.T) {
 
 func TestVerifyDeletedFileExists(t *testing.T) {
 	path := tmpFile(t, "data")
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	artifacts := []module.Artifact{
 		{Path: path, Method: "delete", Risk: "safe"},
