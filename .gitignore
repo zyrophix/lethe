@@ -1,0 +1,12 @@
+# Build artifacts
+/dist/
+/lethe
+*.exe
+
+# Test / runtime logs
+docker/e2e.log
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
