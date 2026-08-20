@@ -20,9 +20,9 @@ Cross-platform anti-forensics trace cleaner with risk-gated operations. Written 
 ## Install
 
 ```sh
-go install github.com/zyrophix/lethe@latest
+go install github.com/zyrophix/lethe/cmd/lethe@latest
 # or a pinned version:
-go install github.com/zyrophix/lethe@v0.2.0
+go install github.com/zyrophix/lethe/cmd/lethe@v0.2.0
 ```
 
 Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
