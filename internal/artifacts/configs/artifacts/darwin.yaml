@@ -1,0 +1,190 @@
+- module: shell
+  risk: safe
+  artifacts:
+    - path: "{{.HomeDir}}/.bash_history"
+      method: truncate
+      risk: safe
+      description: "Bash command history"
+    - path: "{{.HomeDir}}/.zsh_history"
+      method: truncate
+      risk: safe
+      description: "Zsh command history"
+    - path: "{{.HomeDir}}/.sh_history"
+      method: truncate
+      risk: safe
+      description: "Sh command history"
+    - path: "{{.HomeDir}}/.python_history"
+      method: truncate
+      risk: safe
+      description: "Python REPL history"
+    - path: "{{.HomeDir}}/.ipython/profile_default/history.sqlite"
+      method: delete
+      risk: safe
+      description: "IPython history database"
+    - path: "{{.HomeDir}}/.node_repl_history"
+      method: truncate
+      risk: safe
+      description: "Node.js REPL history"
+    - path: "{{.HomeDir}}/.Rhistory"
+      method: truncate
+      risk: safe
+      description: "R history"
+    - path: "{{.HomeDir}}/.local/share/fish/fish_history"
+      method: truncate
+      risk: safe
+      description: "Fish history"
+
+- module: macos
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.Trash/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "User trash"
+    - path: "/.Spotlight-V100/*"
+      method: delete
+      risk: destructive
+      backup: true
+      recursive: true
+      description: "Spotlight index (DESTRUCTIVE)"
+    - path: "/var/folders/*/*/C/com.apple.QuickLook.thumbnailcache/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "QuickLook thumbnail cache"
+    - path: "/var/log/system.log*"
+      method: truncate
+      risk: safe
+      description: "System log"
+    - path: "/var/log/wifi.log*"
+      method: truncate
+      risk: safe
+      description: "WiFi log"
+    - path: "/var/log/install.log*"
+      method: truncate
+      risk: safe
+      description: "Install log"
+    - path: "/var/log/accountpolicy.log*"
+      method: truncate
+      risk: risky
+      description: "Account policy log"
+    - path: "/var/log/fsck*"
+      method: truncate
+      risk: safe
+      description: "Filesystem check log"
+    - path: "/var/log/powermanagement/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Power management logs"
+    - path: "/var/log/com.apple.xpc.launchd/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Launchd logs"
+    - path: "/var/log/asl/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Apple System Log"
+    - path: "/var/log/appfirewall.log*"
+      method: truncate
+      risk: safe
+      description: "Application firewall log"
+
+- module: audit
+  risk: risky
+  artifacts:
+    - path: "/var/audit/*"
+      method: delete
+      risk: destructive
+      backup: true
+      recursive: true
+      description: "BSM audit trail (DESTRUCTIVE)"
+
+- module: browser
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/Library/Safari/History.db"
+      method: delete
+      risk: risky
+      description: "Safari history"
+    - path: "{{.HomeDir}}/Library/Caches/com.apple.Safari/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Safari cache"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/cache2"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Firefox cache"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/places.sqlite"
+      method: delete
+      risk: risky
+      description: "Firefox history"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/cookies.sqlite"
+      method: delete
+      risk: risky
+      description: "Firefox cookies"
+    - path: "{{.HomeDir}}/Library/Application Support/Google/Chrome/Default/History"
+      method: delete
+      risk: risky
+      description: "Chrome history"
+    - path: "{{.HomeDir}}/Library/Application Support/Google/Chrome/Default/Cookies"
+      method: delete
+      risk: risky
+      description: "Chrome cookies"
+
+- module: unified
+  risk: risky
+  artifacts:
+    - path: "/var/db/diagnostics/Persist/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Unified log persist"
+    - path: "/var/db/diagnostics/Special/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Unified log special"
+    - path: "/var/db/diagnostics/HighVolume/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Unified log high volume"
+    - path: "/var/db/diagnostics/timesync/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Unified log timesync"
+
+- module: fileevents
+  risk: risky
+  artifacts:
+    - path: "/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2"
+      method: sqlite
+      risk: risky
+      sqlite_table: "LSQuarantineEvent"
+      description: "System quarantine database"
+    - path: "{{.HomeDir}}/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2"
+      method: sqlite
+      risk: risky
+      sqlite_table: "LSQuarantineEvent"
+      description: "User quarantine database"
+
+- module: usage
+  risk: risky
+  artifacts:
+    - path: "/private/var/db/CoreDuet/Knowledge/knowledgeC.db"
+      method: sqlite
+      risk: destructive
+      backup: true
+      sqlite_table: "ZSTRUCTUREDMETADATA"
+      description: "KnowledgeC app usage database (DESTRUCTIVE)"
+    - path: "/private/var/folders/*/com.apple.notificationcenter/db2/db*"
+      method: delete
+      risk: risky
+      description: "Notification center database"

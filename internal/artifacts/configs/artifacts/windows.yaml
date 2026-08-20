@@ -1,0 +1,215 @@
+- module: events
+  risk: risky
+  artifacts: []
+
+- module: history
+  risk: risky
+  artifacts:
+    - path: "{{.AppData}}/Microsoft/Windows/PowerShell/PSReadLine/ConsoleHost_history.txt"
+      method: truncate
+      risk: safe
+      description: "PowerShell history"
+    - path: "{{.AppData}}/Microsoft/Windows/Recent/*.lnk"
+      method: delete
+      risk: safe
+      description: "Recent file shortcuts"
+    - path: "{{.AppData}}/Microsoft/Windows/Recent/AutomaticDestinations/*"
+      method: delete
+      risk: risky
+      description: "Automatic jump lists"
+    - path: "{{.AppData}}/Microsoft/Windows/Recent/CustomDestinations/*"
+      method: delete
+      risk: risky
+      description: "Custom jump lists"
+    - path: "{{.LocalAppData}}/ConnectedDevicesPlatform/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Windows Timeline/Activity History"
+    - path: "{{.LocalAppData}}/Microsoft/Windows/History/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "IE/Edge browsing history"
+
+- module: registry
+  risk: destructive
+  artifacts:
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU"
+      method: wipe_registry
+      risk: risky
+      description: "Open/Save dialog MRU"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs"
+      method: wipe_registry
+      risk: risky
+      description: "Recent documents"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths"
+      method: wipe_registry
+      risk: risky
+      description: "Explorer typed paths"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist"
+      method: wipe_registry
+      risk: risky
+      description: "UserAssist (program execution tracking)"
+    - path: "HKCU:\\Software\\Microsoft\\Terminal Server Client\\Default"
+      method: wipe_registry
+      risk: risky
+      description: "RDP connection history"
+    - path: "HKCU:\\Software\\Microsoft\\Terminal Server Client\\Servers"
+      method: wipe_registry
+      risk: risky
+      description: "RDP server history"
+    - path: "HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR"
+      method: wipe_registry
+      risk: destructive
+      backup: true
+      description: "USB storage device history (DESTRUCTIVE)"
+    - path: "HKLM:\\SYSTEM\\MountedDevices"
+      method: wipe_registry
+      risk: destructive
+      backup: true
+      description: "Mounted device history (DESTRUCTIVE)"
+    - path: "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings"
+      method: wipe_registry
+      risk: destructive
+      backup: true
+      description: "Background Activity Monitor (DESTRUCTIVE)"
+    - path: "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatCache"
+      method: wipe_registry
+      risk: destructive
+      backup: true
+      description: "ShimCache/AppCompat (DESTRUCTIVE)"
+
+- module: filesystem
+  risk: risky
+  artifacts:
+    - path: "{{.UserProfile}}/AppData/Local/Microsoft/Windows/Explorer/thumbcache_*.db"
+      method: delete
+      risk: safe
+      description: "Thumbnail cache"
+    - path: "{{.SystemRoot}}/System32/sru/SRUDB.dat"
+      method: delete
+      risk: risky
+      description: "SRUM database"
+    - path: "{{.LocalAppData}}/Microsoft/Windows/Notifications/*"
+      method: delete
+      risk: risky
+      description: "Notification history"
+    - path: "{{.UserProfile}}/Thumbs.db"
+      method: delete
+      risk: safe
+      description: "Legacy thumbnail cache"
+
+- module: temp
+  risk: risky
+  artifacts:
+    - path: "{{.Temp}}/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "User temp files"
+    - path: "{{.SystemRoot}}/Temp/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "System temp files"
+    - path: "C:/ProgramData/Microsoft/Windows/WER/ReportArchive/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Windows Error Reporting archive"
+    - path: "C:/Windows/Minidump/*"
+      method: delete
+      risk: safe
+      description: "Minidump files"
+    - path: "C:/Windows/MEMORY.DMP"
+      method: delete
+      risk: risky
+      description: "Full memory dump"
+    - path: "C:/ProgramData/Microsoft/Windows Defender/Scans/History/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Defender scan history"
+    - path: "{{.LocalAppData}}/Microsoft/Windows/INetCache/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "IE/Edge cache"
+    - path: "{{.LocalAppData}}/Microsoft/OneDrive/logs/*"
+      method: delete
+      risk: safe
+      description: "OneDrive logs"
+    - path: "{{.AppData}}/Microsoft/Teams/logs.txt"
+      method: truncate
+      risk: safe
+      description: "Teams logs"
+
+- module: security
+  risk: destructive
+  artifacts:
+    - path: "C:/ProgramData/CrowdStrike/Logs/*"
+      method: delete
+      risk: risky
+      description: "CrowdStrike Falcon logs"
+    - path: "C:/ProgramData/Sentinel/Logs/*"
+      method: delete
+      risk: risky
+      description: "SentinelOne logs"
+    - path: "C:/ProgramData/CarbonBlack/Logs/*"
+      method: delete
+      risk: risky
+      description: "Carbon Black logs"
+    - path: "C:/ProgramData/McAfee/Endpoint Security/Logs/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "McAfee logs"
+    - path: "C:/ProgramData/Symantec/Symantec Endpoint Protection/CurrentVersion/Data/Logs/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Symantec logs"
+    - path: "C:/Windows/System32/LogFiles/Firewall/*.log"
+      method: delete
+      risk: risky
+      description: "Windows Firewall logs"
+    - path: "C:/Windows/System32/wbem/Logs/*.log"
+      method: delete
+      risk: safe
+      description: "WMI activity logs"
+    - path: "C:/ProgramData/Microsoft/Windows Defender Advanced Threat Protection/Cache/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Defender ATP cache"
+
+- module: advanced
+  risk: destructive
+  artifacts:
+    - path: "{{.UserProfile}}/AppData/Local/Microsoft/Windows/Explorer/*.db"
+      method: delete
+      risk: safe
+      description: "Explorer thumbnail and search databases"
+    - path: "C:/Windows/Prefetch/*.pf"
+      method: delete
+      risk: risky
+      description: "Prefetch files"
+    - path: "C:/Windows/AppCompat/Programs/RecentFileCache.bcf"
+      method: delete
+      risk: risky
+      description: "RecentFileCache"
+    - path: "C:/Windows/AppCompat/Programs/Amcache.hve*"
+      method: delete
+      risk: destructive
+      backup: true
+      locking_procs: ["AeLookupSvc.exe"]
+      description: "Amcache (DESTRUCTIVE: application execution history)"
+
+- module: journal
+  risk: destructive
+  artifacts: []
+
+- module: pagefile
+  risk: destructive
+  artifacts: []

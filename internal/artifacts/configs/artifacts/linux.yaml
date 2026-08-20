@@ -1,0 +1,1074 @@
+- module: shell
+  risk: safe
+  artifacts:
+    - path: "{{.HomeDir}}/.bash_history"
+      method: truncate
+      risk: safe
+      description: "Bash command history"
+    - path: "{{.HomeDir}}/.zsh_history"
+      method: truncate
+      risk: safe
+      description: "Zsh command history"
+    - path: "{{.HomeDir}}/.sh_history"
+      method: truncate
+      risk: safe
+      description: "Sh command history"
+    - path: "{{.HomeDir}}/.ash_history"
+      method: truncate
+      risk: safe
+      description: "Ash command history"
+    - path: "{{.HomeDir}}/.fish_history"
+      method: truncate
+      risk: safe
+      description: "Fish command history"
+    - path: "{{.HomeDir}}/.python_history"
+      method: truncate
+      risk: safe
+      description: "Python REPL history"
+    - path: "{{.HomeDir}}/.mysql_history"
+      method: truncate
+      risk: safe
+      description: "MySQL client history"
+    - path: "{{.HomeDir}}/.psql_history"
+      method: truncate
+      risk: safe
+      description: "PostgreSQL client history"
+    - path: "{{.HomeDir}}/.sqlite_history"
+      method: truncate
+      risk: safe
+      description: "SQLite client history"
+    - path: "{{.HomeDir}}/.rediscli_history"
+      method: truncate
+      risk: safe
+      description: "Redis CLI history"
+    - path: "{{.HomeDir}}/.lesshst"
+      method: truncate
+      risk: safe
+      description: "Less command history"
+    - path: "{{.HomeDir}}/.viminfo"
+      method: truncate
+      risk: safe
+      description: "Vim command history"
+    - path: "{{.HomeDir}}/.wget-hsts"
+      method: truncate
+      risk: safe
+      description: "Wget HSTS data"
+    - path: "{{.HomeDir}}/.node_repl_history"
+      method: truncate
+      risk: safe
+      description: "Node.js REPL history"
+    - path: "{{.HomeDir}}/.Rhistory"
+      method: truncate
+      risk: safe
+      description: "R history"
+    - path: "{{.HomeDir}}/.gdb_history"
+      method: truncate
+      risk: safe
+      description: "GDB history"
+    - path: "{{.HomeDir}}/.mongo_history"
+      method: truncate
+      risk: safe
+      description: "MongoDB client history"
+    - path: "{{.HomeDir}}/.docker_history"
+      method: truncate
+      risk: safe
+      description: "Docker CLI history"
+    - path: "{{.HomeDir}}/.irb_history"
+      method: truncate
+      risk: safe
+      description: "Ruby IRB history"
+    - path: "{{.HomeDir}}/.php_history"
+      method: truncate
+      risk: safe
+      description: "PHP REPL history"
+    - path: "{{.HomeDir}}/.perldb_hist"
+      method: truncate
+      risk: safe
+      description: "Perl debugger history"
+    - path: "{{.HomeDir}}/.erlang_history"
+      method: truncate
+      risk: safe
+      description: "Erlang history"
+    - path: "{{.HomeDir}}/.lua_history"
+      method: truncate
+      risk: safe
+      description: "Lua history"
+    - path: "{{.HomeDir}}/.scala_history"
+      method: truncate
+      risk: safe
+      description: "Scala REPL history"
+    - path: "{{.HomeDir}}/.octave_hist"
+      method: truncate
+      risk: safe
+      description: "Octave history"
+    - path: "{{.HomeDir}}/.rsync_history"
+      method: truncate
+      risk: safe
+      description: "Rsync history"
+    - path: "{{.HomeDir}}/.ipython/profile_default/history.sqlite"
+      method: delete
+      risk: safe
+      description: "IPython history database"
+    - path: "{{.HomeDir}}/.julia/logs/repl_history.jl"
+      method: delete
+      risk: safe
+      description: "Julia REPL history"
+    - path: "{{.HomeDir}}/.ghc/ghci_history"
+      method: truncate
+      risk: safe
+      description: "GHCi history"
+    - path: "{{.HomeDir}}/.matlab/R2023a/History.xml"
+      method: delete
+      risk: safe
+      description: "MATLAB history"
+    - path: "{{.HomeDir}}/.local/share/fish/fish_history"
+      method: truncate
+      risk: safe
+      description: "Fish history (xdg)"
+    - path: "{{.HomeDir}}/.local/share/recently-used.xbel"
+      method: delete
+      risk: safe
+      description: "Recently used files"
+    - path: "{{.HomeDir}}/.local/share/mc/history"
+      method: truncate
+      risk: safe
+      description: "Midnight Commander history"
+    - path: "{{.HomeDir}}/.local/share/nano/search_history"
+      method: truncate
+      risk: safe
+      description: "Nano search history"
+
+- module: logs
+  risk: safe
+  artifacts:
+    - path: "/var/log/syslog*"
+      method: truncate
+      risk: safe
+      description: "Syslog"
+    - path: "/var/log/messages*"
+      method: truncate
+      risk: safe
+      description: "System messages"
+    - path: "/var/log/auth.log*"
+      method: truncate
+      risk: risky
+      description: "Authentication log"
+    - path: "/var/log/secure*"
+      method: truncate
+      risk: risky
+      description: "Authentication log (RHEL)"
+    - path: "/var/log/kern.log*"
+      method: truncate
+      risk: safe
+      description: "Kernel log"
+    - path: "/var/log/dmesg*"
+      method: truncate
+      risk: safe
+      description: "Boot messages"
+    - path: "/var/log/boot.log*"
+      method: truncate
+      risk: safe
+      description: "Boot log"
+    - path: "/var/log/lastlog"
+      method: truncate
+      risk: risky
+      description: "Last login times for all users"
+    - path: "/var/log/wtmp"
+      method: truncate
+      risk: risky
+      description: "Historical login records"
+    - path: "/var/log/btmp"
+      method: truncate
+      risk: risky
+      description: "Failed login attempts"
+    - path: "/var/log/faillog"
+      method: truncate
+      risk: safe
+      description: "Failed login log"
+    - path: "/var/log/dpkg.log*"
+      method: truncate
+      risk: safe
+      description: "dpkg package log"
+    - path: "/var/log/apt/history.log*"
+      method: truncate
+      risk: safe
+      description: "APT history"
+    - path: "/var/log/apt/term.log*"
+      method: truncate
+      risk: safe
+      description: "APT terminal log"
+    - path: "/var/log/alternatives.log*"
+      method: truncate
+      risk: safe
+      description: "Alternatives log"
+    - path: "/var/log/yum.log*"
+      method: truncate
+      risk: safe
+      description: "Yum package log"
+    - path: "/var/log/dnf.log*"
+      method: truncate
+      risk: safe
+      description: "DNF package log"
+    - path: "/var/log/cron*"
+      method: truncate
+      risk: safe
+      description: "Cron log"
+    - path: "/var/log/mail*"
+      method: truncate
+      risk: safe
+      description: "Mail log"
+    - path: "/var/log/maillog*"
+      method: truncate
+      risk: safe
+      description: "Mail log (RHEL)"
+    - path: "/var/log/exim4/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Exim mail logs"
+    - path: "/var/log/ufw.log*"
+      method: truncate
+      risk: safe
+      description: "UFW firewall log"
+    - path: "/var/log/firewalld*"
+      method: truncate
+      risk: safe
+      description: "Firewalld log"
+    - path: "/var/log/iptables.log*"
+      method: truncate
+      risk: safe
+      description: "iptables log"
+    - path: "/var/log/Xorg.*.log*"
+      method: truncate
+      risk: safe
+      description: "Xorg log"
+    - path: "/var/log/cups/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "CUPS print logs"
+    - path: "/var/log/daemon.log*"
+      method: truncate
+      risk: safe
+      description: "Daemon log"
+    - path: "/var/log/mount.log*"
+      method: truncate
+      risk: safe
+      description: "Mount log"
+    - path: "/var/log/apache2/*.log"
+      method: truncate
+      risk: safe
+      description: "Apache logs"
+    - path: "/var/log/nginx/*.log"
+      method: truncate
+      risk: safe
+      description: "Nginx logs"
+    - path: "/var/log/httpd/*.log"
+      method: truncate
+      risk: safe
+      description: "Apache logs (RHEL)"
+    - path: "/var/log/mysql/*.log"
+      method: truncate
+      risk: risky
+      description: "MySQL logs"
+    - path: "/var/log/postgresql/*.log"
+      method: truncate
+      risk: risky
+      description: "PostgreSQL logs"
+    - path: "/var/log/redis/*.log"
+      method: truncate
+      risk: safe
+      description: "Redis logs"
+    - path: "/var/log/mongodb/*.log"
+      method: truncate
+      risk: safe
+      description: "MongoDB logs"
+    - path: "/var/log/openvpn/*.log"
+      method: truncate
+      risk: risky
+      description: "OpenVPN logs"
+    - path: "/var/log/squid/*.log"
+      method: truncate
+      risk: safe
+      description: "Squid proxy logs"
+    - path: "/var/log/dovecot/*.log"
+      method: truncate
+      risk: safe
+      description: "Dovecot mail logs"
+    - path: "/var/log/elasticsearch/*.log"
+      method: truncate
+      risk: safe
+      description: "Elasticsearch logs"
+    - path: "/var/log/logstash/*.log"
+      method: truncate
+      risk: safe
+      description: "Logstash logs"
+    - path: "/var/log/kibana/*.log"
+      method: truncate
+      risk: safe
+      description: "Kibana logs"
+    - path: "/var/log/sysstat/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "sysstat data"
+
+- module: audit
+  risk: risky
+  artifacts:
+    - path: "/var/log/audit/audit.log*"
+      method: truncate
+      risk: risky
+      description: "Audit log"
+    - path: "/var/log/audit/ausearch.log*"
+      method: truncate
+      risk: risky
+      description: "Audit search log"
+
+- module: temp
+  risk: safe
+  artifacts:
+    - path: "/tmp/*.sh"
+      method: delete
+      risk: safe
+      description: "Shell scripts in /tmp"
+    - path: "/tmp/*.py"
+      method: delete
+      risk: safe
+      description: "Python scripts in /tmp"
+    - path: "/tmp/*.pl"
+      method: delete
+      risk: safe
+      description: "Perl scripts in /tmp"
+    - path: "/var/tmp/*.sh"
+      method: delete
+      risk: safe
+      description: "Shell scripts in /var/tmp"
+    - path: "/var/tmp/*.py"
+      method: delete
+      risk: safe
+      description: "Python scripts in /var/tmp"
+    - path: "/dev/shm/*.sh"
+      method: delete
+      risk: safe
+      description: "Shell scripts in /dev/shm"
+    - path: "/dev/shm/*.py"
+      method: delete
+      risk: safe
+      description: "Python scripts in /dev/shm"
+    - path: "/tmp/core*"
+      method: delete
+      risk: safe
+      description: "Core dumps in /tmp"
+    - path: "/var/crash/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Crash reports"
+    - path: "/var/lib/systemd/coredump/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "systemd coredumps"
+    - path: "{{.HomeDir}}/.local/share/Trash/files/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "User trash files"
+    - path: "{{.HomeDir}}/.local/share/Trash/info/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "User trash metadata"
+
+- module: network
+  risk: risky
+  artifacts:
+    - path: "/etc/NetworkManager/system-connections/*"
+      method: delete
+      risk: risky
+      backup: true
+      description: "NetworkManager connection profiles"
+    - path: "/var/lib/dhclient/*.leases"
+      method: delete
+      risk: risky
+      description: "DHCP leases (dhclient)"
+    - path: "/var/lib/dhcp/*.leases"
+      method: delete
+      risk: risky
+      description: "DHCP leases (dhcpd)"
+    - path: "/var/lib/mysql/mysql-bin.*"
+      method: delete
+      risk: destructive
+      backup: true
+      locking_procs: ["mysqld"]
+      exclude: ["mysql-bin.index"]
+      description: "MySQL binary replication logs (DESTRUCTIVE: breaks replication)"
+    - path: "/var/lib/mysql/ib_logfile*"
+      method: delete
+      risk: destructive
+      backup: true
+      locking_procs: ["mysqld"]
+      description: "MySQL InnoDB redo logs (DESTRUCTIVE: can corrupt DB)"
+    - path: "/etc/openvpn/client/*.conf"
+      method: delete
+      risk: risky
+      backup: true
+      description: "OpenVPN client configs"
+    - path: "/etc/wireguard/*.conf"
+      method: delete
+      risk: risky
+      backup: true
+      description: "WireGuard configs"
+    - path: "/var/spool/postfix/deferred/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Postfix deferred mail"
+    - path: "/etc/iptables/rules.v4"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "iptables persistent rules (DESTRUCTIVE)"
+
+- module: user
+  risk: risky
+  artifacts:
+    - path: "/var/log/utmp"
+      method: truncate
+      risk: risky
+      description: "Current login records"
+    - path: "{{.HomeDir}}/.config/gtk-3.0/bookmarks"
+      method: truncate
+      risk: safe
+      description: "GTK bookmarks"
+    - path: "{{.HomeDir}}/.cache/tracker*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "GNOME Tracker cache"
+    - path: "{{.HomeDir}}/.local/state/tracker*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "GNOME Tracker state"
+    - path: "{{.HomeDir}}/.local/share/zeitgeist/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Zeitgeist activity log"
+    - path: "{{.HomeDir}}/.gitconfig"
+      method: delete
+      risk: risky
+      backup: true
+      description: "Git global config"
+    - path: "{{.HomeDir}}/.git-credentials"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "Git credentials (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.hgrc"
+      method: delete
+      risk: risky
+      description: "Mercurial config"
+    - path: "{{.HomeDir}}/.npmrc"
+      method: delete
+      risk: risky
+      backup: true
+      description: "npm config"
+    - path: "{{.HomeDir}}/.m2/settings.xml"
+      method: delete
+      risk: risky
+      backup: true
+      description: "Maven settings"
+    - path: "{{.HomeDir}}/.gradle/gradle.properties"
+      method: delete
+      risk: risky
+      description: "Gradle properties"
+    - path: "{{.HomeDir}}/.config/pip/pip.conf"
+      method: delete
+      risk: risky
+      description: "pip config"
+    - path: "{{.HomeDir}}/.cargo/config"
+      method: delete
+      risk: risky
+      description: "Cargo config"
+    - path: "{{.HomeDir}}/.aws/credentials"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "AWS access keys (DESTRUCTIVE: irreversible credential loss)"
+    - path: "{{.HomeDir}}/.aws/config"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "AWS config (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.config/gcloud/application_default_credentials.json"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "GCP default credentials (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.azure/azureProfile.json"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "Azure profile (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.kube/config"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "Kubernetes cluster credentials (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.terraform.d/credentials.tfrc.json"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "Terraform Cloud credentials (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.duplicity_credentials"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "Duplicity backup credentials (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.config/KeePass"
+      method: delete
+      risk: destructive
+      backup: true
+      recursive: true
+      description: "KeePass password manager data (DESTRUCTIVE)"
+    - path: "{{.HomeDir}}/.config/prometheus/prometheus.yml"
+      method: delete
+      risk: risky
+      description: "Prometheus config"
+    - path: "{{.HomeDir}}/.config/grafana/grafana.ini"
+      method: delete
+      risk: risky
+      description: "Grafana config"
+    - path: "{{.HomeDir}}/.msf4/history"
+      method: truncate
+      risk: risky
+      description: "Metasploit history"
+    - path: "{{.HomeDir}}/.subversion/auth"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "SVN auth data"
+    - path: "{{.HomeDir}}/.nmap"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Nmap data"
+    - path: "{{.HomeDir}}/.aircrack-ng"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Aircrack-ng data"
+    - path: "{{.HomeDir}}/.john"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "John the Ripper data"
+    - path: "{{.HomeDir}}/.hashcat"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Hashcat data"
+    - path: "{{.HomeDir}}/.irssi"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Irssi IRC data"
+    - path: "{{.HomeDir}}/.weechat"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "WeeChat data"
+    - path: "{{.HomeDir}}/.purple/logs"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Pidgin chat logs"
+    - path: "{{.HomeDir}}/.config/discord/settings.json"
+      method: delete
+      risk: risky
+      description: "Discord settings"
+    - path: "{{.HomeDir}}/.config/slack-term/config"
+      method: delete
+      risk: risky
+      description: "Slack config"
+    - path: "{{.HomeDir}}/.config/wireshark"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Wireshark config"
+    - path: "{{.HomeDir}}/.config/ettercap"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Ettercap config"
+    - path: "{{.HomeDir}}/.autopsy"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Autopsy forensic data"
+    - path: "{{.HomeDir}}/.config/freerdp"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "FreeRDP config"
+    - path: "{{.HomeDir}}/.local/share/remmina"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Remmina RDP data"
+    - path: "{{.HomeDir}}/.vnc"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "VNC config"
+    - path: "{{.HomeDir}}/.config/teamviewer"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "TeamViewer config"
+    - path: "{{.HomeDir}}/.anydesk"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "AnyDesk config"
+    - path: "{{.HomeDir}}/.config/transmission"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Transmission torrent data"
+    - path: "{{.HomeDir}}/.config/qBittorrent"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "qBittorrent data"
+    - path: "{{.HomeDir}}/.config/deluge"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Deluge torrent data"
+    - path: "{{.HomeDir}}/.aMule"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "aMule data"
+    - path: "{{.HomeDir}}/.config/vlc"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "VLC config"
+    - path: "{{.HomeDir}}/.audacity-data"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Audacity data"
+    - path: "{{.HomeDir}}/.config/GIMP"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "GIMP config"
+    - path: "{{.HomeDir}}/.config/obs-studio"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "OBS Studio config"
+    - path: "{{.HomeDir}}/.config/libreoffice"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "LibreOffice config"
+    - path: "{{.HomeDir}}/.thunderbird"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Thunderbird data"
+    - path: "{{.HomeDir}}/.config/evolution"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Evolution mail data"
+
+- module: package
+  risk: safe
+  artifacts:
+    - path: "{{.PackageCacheDir}}/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Distro package cache"
+    - path: "/var/log/apt/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "APT logs"
+
+- module: browser
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/cache2"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Firefox cache"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/storage"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Firefox storage"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/thumbnails"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Firefox thumbnails"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/sessionstore-backups"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Firefox session backups"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/places.sqlite"
+      method: delete
+      risk: risky
+      description: "Firefox history database"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/cookies.sqlite"
+      method: delete
+      risk: risky
+      description: "Firefox cookies"
+    - path: "{{.HomeDir}}/.mozilla/firefox/*/formhistory.sqlite"
+      method: delete
+      risk: risky
+      description: "Firefox form history"
+    - path: "{{.HomeDir}}/.config/google-chrome/Default/Cache"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Chrome cache"
+    - path: "{{.HomeDir}}/.config/google-chrome/Default/History"
+      method: delete
+      risk: risky
+      description: "Chrome history"
+    - path: "{{.HomeDir}}/.config/google-chrome/Default/Cookies"
+      method: delete
+      risk: risky
+      description: "Chrome cookies"
+    - path: "{{.HomeDir}}/.config/google-chrome/Default/Web Data"
+      method: delete
+      risk: risky
+      description: "Chrome web data"
+    - path: "{{.HomeDir}}/.config/chromium/Default/Cache"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Chromium cache"
+    - path: "{{.HomeDir}}/.config/chromium/Default/History"
+      method: delete
+      risk: risky
+      description: "Chromium history"
+    - path: "{{.HomeDir}}/.config/chromium/Default/Cookies"
+      method: delete
+      risk: risky
+      description: "Chromium cookies"
+
+- module: ssh
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.ssh/known_hosts"
+      method: truncate
+      risk: risky
+      description: "SSH known hosts"
+    - path: "{{.HomeDir}}/.ssh/*.log"
+      method: delete
+      risk: safe
+      description: "SSH logs"
+
+- module: container
+  risk: risky
+  artifacts:
+    - path: "/var/lib/docker/containers/*/*.log"
+      method: truncate
+      risk: safe
+      description: "Docker container logs"
+    - path: "{{.HomeDir}}/.docker/config.json"
+      method: delete
+      risk: risky
+      backup: true
+      description: "Docker client config"
+    - path: "/var/log/pods/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Kubernetes pod logs"
+    - path: "/var/log/libvirt/qemu/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "libvirt/QEMU logs"
+
+- module: systemd
+  risk: risky
+  artifacts:
+    - path: "/var/lib/systemd/random-seed"
+      method: delete
+      risk: destructive
+      backup: true
+      description: "System random seed (DESTRUCTIVE: degrades entropy)"
+    - path: "/run/log/journal/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Runtime journal"
+
+- module: print
+  risk: safe
+  artifacts:
+    - path: "/var/spool/cups/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "CUPS print jobs"
+    - path: "/var/log/cups/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "CUPS logs"
+
+- module: cicd
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.jenkins/workspace"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Jenkins workspace"
+    - path: "{{.HomeDir}}/.cache/act"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "act cache"
+    - path: "{{.HomeDir}}/.gitlab-runner/config.toml"
+      method: delete
+      risk: risky
+      backup: true
+      description: "GitLab Runner config"
+    - path: "{{.HomeDir}}/.circleci/cli.yml"
+      method: delete
+      risk: risky
+      description: "CircleCI config"
+    - path: "{{.HomeDir}}/.travis/config.yml"
+      method: delete
+      risk: risky
+      description: "Travis CI config"
+
+- module: idsips
+  risk: risky
+  artifacts:
+    - path: "/var/log/snort/*"
+      method: truncate
+      risk: risky
+      description: "Snort IDS logs"
+    - path: "/var/log/suricata/*"
+      method: truncate
+      risk: risky
+      description: "Suricata IDS logs"
+    - path: "/var/ossec/logs/alerts/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "OSSEC HIDS alerts"
+    - path: "/var/ossec/logs/*.log"
+      method: truncate
+      risk: risky
+      description: "OSSEC logs"
+    - path: "/var/log/fail2ban/*"
+      method: truncate
+      risk: risky
+      description: "Fail2ban logs"
+    - path: "/var/log/samhain/*"
+      method: truncate
+      risk: risky
+      description: "Samhain logs"
+
+- module: crypto
+  risk: destructive
+  artifacts:
+    - path: "{{.HomeDir}}/.bitcoin/bitcoin.conf"
+      method: delete
+      risk: risky
+      backup: true
+      description: "Bitcoin config"
+    - path: "{{.HomeDir}}/.monero/monero-wallet-cli.conf"
+      method: delete
+      risk: risky
+      backup: true
+      description: "Monero config"
+    - path: "{{.HomeDir}}/.ethereum/keystore"
+      method: delete
+      risk: destructive
+      backup: true
+      recursive: true
+      description: "Ethereum wallet keys (DESTRUCTIVE: irreversible fund loss)"
+    - path: "{{.HomeDir}}/.config/xmrig"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "XMRig mining config"
+    - path: "{{.HomeDir}}/.electrum/wallets"
+      method: delete
+      risk: destructive
+      backup: true
+      recursive: true
+      description: "Electrum wallets (DESTRUCTIVE: irreversible fund loss)"
+
+- module: privacy
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.tor-browser/profile.default"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Tor Browser profile"
+    - path: "{{.HomeDir}}/.tor/torrc"
+      method: delete
+      risk: risky
+      backup: true
+      description: "Tor config"
+    - path: "{{.HomeDir}}/.i2p/router.config"
+      method: delete
+      risk: risky
+      description: "I2P config"
+    - path: "{{.HomeDir}}/.config/protonvpn"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "ProtonVPN config"
+    - path: "{{.HomeDir}}/.config/mullvad"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Mullvad VPN config"
+    - path: "{{.HomeDir}}/.config/tails"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Tails config"
+
+- module: pentest
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.BurpSuite"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Burp Suite data"
+    - path: "{{.HomeDir}}/.ZAP"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "OWASP ZAP data"
+    - path: "{{.HomeDir}}/.cobaltstrike"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Cobalt Strike data"
+    - path: "{{.HomeDir}}/.empire"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Empire data"
+    - path: "{{.HomeDir}}/.beef"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "BeEF data"
+
+- module: osint
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.maltego"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Maltego data"
+    - path: "{{.HomeDir}}/.spiderfoot"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "SpiderFoot data"
+    - path: "{{.HomeDir}}/.theharvester"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "theHarvester data"
+    - path: "{{.HomeDir}}/.recon-ng"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Recon-ng data"
+    - path: "{{.HomeDir}}/.shodan"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Shodan data"
+
+- module: iot
+  risk: risky
+  artifacts:
+    - path: "{{.HomeDir}}/.homeassistant"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Home Assistant data"
+    - path: "{{.HomeDir}}/.mosquitto"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Mosquitto MQTT data"
+    - path: "{{.HomeDir}}/.node-red"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Node-RED data"
+    - path: "{{.HomeDir}}/.openhab"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "OpenHAB data"
+
+- module: ml
+  risk: safe
+  artifacts:
+    - path: "{{.HomeDir}}/.jupyter/jupyter_notebook_config.py"
+      method: delete
+      risk: safe
+      description: "Jupyter config"
+    - path: "{{.HomeDir}}/.ipynb_checkpoints"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Jupyter checkpoints"
+    - path: "{{.HomeDir}}/.tensorboard"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "TensorBoard data"
+    - path: "{{.HomeDir}}/.cache/torch"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "PyTorch cache"
+    - path: "{{.HomeDir}}/.keras"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Keras data"
+    - path: "{{.HomeDir}}/.mlflow"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "MLflow data"
+    - path: "{{.HomeDir}}/.wandb"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Weights & Biases data"
