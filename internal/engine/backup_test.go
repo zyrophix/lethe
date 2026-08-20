@@ -147,8 +147,8 @@ func TestSanitizeRestorePath(t *testing.T) {
 	validTemp := filepath.Join(os.TempDir(), "file.txt")
 	validSystem := "/var/log/syslog"
 	if runtime.GOOS == "windows" {
-		validHome = filepath.Join(os.Getenv("SystemDrive"), `\Users\user`, "file.txt")
-		validSystem = filepath.Join(os.Getenv("SystemDrive"), "Windows", "Temp", "file.txt")
+		validHome = os.Getenv("SystemDrive") + `\Users\user\file.txt`
+		validSystem = os.Getenv("SystemDrive") + `\Windows\Temp\file.txt`
 	}
 
 	tests := []struct {
