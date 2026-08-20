@@ -37,6 +37,17 @@ jobs:
           go-version: "1.26.3"
       - run: go test ./internal/engine/ -tags=integration -race
 
+  windows:
+    name: Test (windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.3"
+      - run: go build ./...
+      - run: go test ./... -race
+
   e2e-docker:
     name: E2E (Docker root modules)
     runs-on: ubuntu-latest

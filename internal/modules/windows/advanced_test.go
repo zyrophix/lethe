@@ -3,6 +3,7 @@ package windows
 import (
 	"os"
 	"os/exec"
+	"strconv"
 	"testing"
 
 	"github.com/zyrophix/lethe/internal/module"
@@ -118,8 +119,18 @@ func TestPagefileCleanRunsCommand(t *testing.T) {
 }
 
 func fakeCmd(exitCode int) *exec.Cmd {
-	if exitCode == 0 {
-		return exec.Command("true")
+	cmd := exec.Command(os.Args[0], "-test.run=TestHelperProcess")
+	cmd.Env = append(os.Environ(), "LETHE_HELPER_EXIT="+strconv.Itoa(exitCode))
+	return cmd
+}
+
+func TestHelperProcess(t *testing.T) {
+	if os.Getenv("LETHE_HELPER_EXIT") == "" {
+		return
 	}
-	return exec.Command("false")
+	code, err := strconv.Atoi(os.Getenv("LETHE_HELPER_EXIT"))
+	if err != nil {
+		os.Exit(2)
+	}
+	os.Exit(code)
 }

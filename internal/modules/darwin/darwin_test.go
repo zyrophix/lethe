@@ -2,7 +2,9 @@ package darwin
 
 import (
 	"errors"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -17,11 +19,29 @@ type cmdRecorder struct {
 func (r *cmdRecorder) fake() func(string, ...string) *exec.Cmd {
 	return func(name string, args ...string) *exec.Cmd {
 		r.cmds = append(r.cmds, append([]string{name}, args...))
+		exit := 0
 		if len(r.cmds) <= r.fails {
-			return exec.Command("false")
+			exit = 1
 		}
-		return exec.Command("true")
+		return helperCmd(exit)
 	}
+}
+
+func helperCmd(exitCode int) *exec.Cmd {
+	cmd := exec.Command(os.Args[0], "-test.run=TestHelperProcess")
+	cmd.Env = append(os.Environ(), "LETHE_HELPER_EXIT="+strconv.Itoa(exitCode))
+	return cmd
+}
+
+func TestHelperProcess(t *testing.T) {
+	if os.Getenv("LETHE_HELPER_EXIT") == "" {
+		return
+	}
+	code, err := strconv.Atoi(os.Getenv("LETHE_HELPER_EXIT"))
+	if err != nil {
+		os.Exit(2)
+	}
+	os.Exit(code)
 }
 
 func rootAllowed() func() error {
