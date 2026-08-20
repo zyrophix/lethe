@@ -14,12 +14,20 @@ func TestBackupCreateAndRestore(t *testing.T) {
 	dir := t.TempDir()
 
 	srcDir := filepath.Join(dir, "src")
-	os.MkdirAll(srcDir, 0755)
-	os.WriteFile(filepath.Join(srcDir, "file1.txt"), []byte("hello"), 0644)
-	os.WriteFile(filepath.Join(srcDir, "file2.txt"), []byte("world"), 0644)
+	if err := os.MkdirAll(srcDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcDir, "file1.txt"), []byte("hello"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcDir, "file2.txt"), []byte("world"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	backupDir := filepath.Join(dir, "backups")
-	os.MkdirAll(backupDir, 0755)
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 
 	b := NewBackup(backupDir)
 	artifacts := []module.Artifact{
@@ -62,7 +70,9 @@ func TestBackupCreateAndRestore(t *testing.T) {
 		t.Errorf("file2 content: got %q, want %q", data, "world")
 	}
 
-	b.Cleanup()
+	if err := b.Cleanup(); err != nil {
+		t.Fatalf("cleanup: %v", err)
+	}
 	if _, err := os.Stat(b.Path()); !os.IsNotExist(err) {
 		t.Error("tar should be removed after cleanup")
 	}
@@ -78,18 +88,24 @@ func TestBackupPathTraversalRejection(t *testing.T) {
 	}
 
 	tw := tar.NewWriter(f)
-	tw.WriteHeader(&tar.Header{
+	if err := tw.WriteHeader(&tar.Header{
 		Name:     "../../etc/passwd",
 		Typeflag: tar.TypeReg,
 		Mode:     0644,
 		Size:     4,
-	})
-	tw.Write([]byte("evil"))
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tw.Write([]byte("evil")); err != nil {
+		t.Fatal(err)
+	}
 	tw.Close()
 	f.Close()
 
 	b := &Backup{Dir: tarPath[:len(tarPath)-4]}
-	b.Create(nil, "")
+	if err := b.Create(nil, ""); err != nil {
+		t.Fatalf("Create with nil artifacts should succeed, got: %v", err)
+	}
 
 	f, _ = os.Open(tarPath)
 	tr := tar.NewReader(f)

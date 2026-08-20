@@ -140,8 +140,12 @@ func TestCleanArtifactDelete(t *testing.T) {
 func TestCleanArtifactDeleteRecursive(t *testing.T) {
 	dir := tmpDir(t)
 	sub := filepath.Join(dir, "subdir")
-	os.MkdirAll(sub, 0755)
-	os.WriteFile(filepath.Join(sub, "file.txt"), []byte("data"), 0644)
+	if err := os.MkdirAll(sub, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sub, "file.txt"), []byte("data"), 0644); err != nil {
+		t.Fatal(err)
+	}
 	defer os.RemoveAll(dir)
 
 	w := &mockWriter{}
@@ -200,8 +204,12 @@ func TestCleanArtifactExclude(t *testing.T) {
 	defer os.RemoveAll(dir)
 	keep := filepath.Join(dir, "important.log")
 	junk := filepath.Join(dir, "junk.log")
-	os.WriteFile(keep, []byte("keep"), 0644)
-	os.WriteFile(junk, []byte("junk"), 0644)
+	if err := os.WriteFile(keep, []byte("keep"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(junk, []byte("junk"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	w := &mockWriter{}
 	reg := module.NewRegistry()

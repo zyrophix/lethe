@@ -164,7 +164,9 @@ func (w *TextWriter) writeAudit(level Level, module, artifact, action, riskStr, 
 		fmt.Fprintf(os.Stderr, "json marshal error: %v\n", err)
 		return
 	}
-	w.auditLog.Write(append(data, '\n'))
+	if _, err := w.auditLog.Write(append(data, '\n')); err != nil {
+		fmt.Fprintf(os.Stderr, "audit write error: %v\n", err)
+	}
 }
 
 type JSONWriter struct {
@@ -201,9 +203,14 @@ func (w *JSONWriter) writeEntry(entry Entry) {
 		fmt.Fprintf(os.Stderr, "json marshal error: %v\n", err)
 		return
 	}
-	w.out.Write(append(data, '\n'))
+	if _, err := w.out.Write(append(data, '\n')); err != nil {
+		fmt.Fprintf(os.Stderr, "json write error: %v\n", err)
+		return
+	}
 	if w.auditLog != nil {
-		w.auditLog.Write(append(data, '\n'))
+		if _, err := w.auditLog.Write(append(data, '\n')); err != nil {
+			fmt.Fprintf(os.Stderr, "audit write error: %v\n", err)
+		}
 	}
 }
 

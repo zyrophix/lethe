@@ -276,7 +276,9 @@ func (e *Engine) cleanResolvedPath(moduleName string, a module.Artifact, resolve
 						}
 						defer func(p, s string) {
 							e.writer.Debug(moduleName, fmt.Sprintf("restarting service %s", s))
-							startService(s)
+							if err := startService(s); err != nil {
+								e.writer.Warning(fmt.Sprintf("failed to restart %s: %v", s, err))
+							}
 						}(proc, svc)
 					}
 				} else {

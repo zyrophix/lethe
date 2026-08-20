@@ -66,17 +66,6 @@ func startService(name string) error {
 	}
 }
 
-func killProcess(name string) error {
-	switch runtime.GOOS {
-	case "linux", "darwin":
-		return exec.Command("pkill", "-x", name).Run()
-	case "windows":
-		return exec.Command("taskkill", "/F", "/IM", name).Run()
-	default:
-		return fmt.Errorf("unsupported platform")
-	}
-}
-
 func serviceNameForProcess(procName string) string {
 	switch procName {
 	case "mysqld":

@@ -170,8 +170,12 @@ func TestVerifyAllExpandsHomes(t *testing.T) {
 		t.Errorf("files with content should NOT verify as cleaned: %s", results[0].Reason)
 	}
 
-	os.Truncate(filepath.Join(homeA, ".bash_history"), 0)
-	os.Truncate(filepath.Join(homeB, ".bash_history"), 0)
+	if err := os.Truncate(filepath.Join(homeA, ".bash_history"), 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Truncate(filepath.Join(homeB, ".bash_history"), 0); err != nil {
+		t.Fatal(err)
+	}
 
 	results = VerifyAll(artifacts, []string{homeA, homeB})
 	if !results[0].Cleaned {
