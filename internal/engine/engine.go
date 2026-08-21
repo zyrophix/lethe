@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -90,7 +91,13 @@ type RunOptions struct {
 	Debug         bool
 }
 
-func (e *Engine) Run(opts RunOptions) error {
+func (e *Engine) Run(ctx context.Context, opts RunOptions) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	start := time.Now()
 	e.dryRun = opts.DryRun
 	e.useShred = opts.UseShred
@@ -156,20 +163,49 @@ func (e *Engine) Run(opts RunOptions) error {
 	if opts.Parallel {
 		var wg sync.WaitGroup
 		for _, m := range selected {
+			select {
+			case <-ctx.Done():
+				e.stats.Duration = time.Since(start)
+				return ctx.Err()
+			default:
+			}
 			wg.Add(1)
 			go func(mod module.Module) {
 				defer wg.Done()
-				e.runModule(mod)
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					e.runModule(ctx, mod)
+				}
 			}(m)
 		}
 		wg.Wait()
+		select {
+		case <-ctx.Done():
+			e.stats.Duration = time.Since(start)
+			return ctx.Err()
+		default:
+		}
 	} else {
 		for _, m := range selected {
-			e.runModule(m)
+			select {
+			case <-ctx.Done():
+				e.stats.Duration = time.Since(start)
+				return ctx.Err()
+			default:
+			}
+			e.runModule(ctx, m)
 		}
 	}
 
 	if opts.WipeFreeSpace && !opts.DryRun {
+		select {
+		case <-ctx.Done():
+			e.stats.Duration = time.Since(start)
+			return ctx.Err()
+		default:
+		}
 		e.writer.Warning("wiping free space — this can take a long time")
 		startWipe := time.Now()
 		written, err := wipeFreeSpace(os.TempDir(), -1)
@@ -186,11 +222,25 @@ func (e *Engine) Run(opts RunOptions) error {
 	return nil
 }
 
-func (e *Engine) runModule(m module.Module) {
+func (e *Engine) runModule(ctx context.Context, m module.Module) {
+	if ctx != nil {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+	}
 	e.writer.Info(m.Name(), "cleaning module...")
 
 	artifacts := m.Artifacts()
 	for i := range artifacts {
+		if ctx != nil {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+		}
 		if !e.policy.Allowed(artifacts[i].GetRisk()) {
 			e.stats.IncSkipped()
 			continue
@@ -198,7 +248,7 @@ func (e *Engine) runModule(m module.Module) {
 		e.cleanArtifact(m.Name(), artifacts[i])
 	}
 
-	ctx := module.Context{
+	cctx := module.Context{
 		DryRun:  e.dryRun,
 		MaxRisk: e.policy.MaxRisk,
 		HomeDir: e.homeDir,
@@ -206,7 +256,7 @@ func (e *Engine) runModule(m module.Module) {
 		Backup:  e.backup != nil,
 		Shred:   e.useShred,
 	}
-	if err := m.CustomClean(ctx); err != nil {
+	if err := m.CustomClean(cctx); err != nil {
 		e.writer.Error(fmt.Sprintf("[%s] custom clean failed: %v", m.Name(), err))
 		e.stats.IncFailed()
 	}

@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sync"
@@ -251,7 +252,7 @@ func TestRunRiskPolicyFiltering(t *testing.T) {
 	reg.Register(mod)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), w, "/tmp")
-	err := eng.Run(RunOptions{DryRun: true})
+	err := eng.Run(context.Background(), RunOptions{DryRun: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -270,7 +271,7 @@ func TestRunUnknownModule(t *testing.T) {
 	reg := module.NewRegistry()
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), w, "/tmp")
 
-	err := eng.Run(RunOptions{ModuleNames: []string{"nonexistent"}})
+	err := eng.Run(context.Background(), RunOptions{ModuleNames: []string{"nonexistent"}})
 	if err == nil {
 		t.Error("expected error for unknown module")
 	}

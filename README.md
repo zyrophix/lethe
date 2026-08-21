@@ -42,7 +42,7 @@ Lethe is the only cross-platform, statically-linked, test-covered cleaner with `
 ```sh
 go install github.com/zyrophix/lethe/cmd/lethe@latest
 # pinned version:
-go install github.com/zyrophix/lethe/cmd/lethe@v0.2.0
+go install github.com/zyrophix/lethe/cmd/lethe@v0.3.0
 ```
 
 Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
@@ -127,17 +127,27 @@ Operations above `--max-risk` are skipped, never auto-approved.
 
 ```go
 import (
+    "context"
     "github.com/zyrophix/lethe"
-    "github.com/zyrophix/lethe/internal/risk"
 )
 
-res, err := lethe.Clean(lethe.Options{DryRun: true, MaxRisk: risk.RiskRisky})
-ok, err := lethe.Verify(risk.RiskSafe, nil)
-err = lethe.ShredFile("/tmp/secret", 3)
-err = lethe.BackupAndClean(lethe.Options{MaxRisk: risk.RiskDestructive})
+// Clean with risk gating and structured logging
+res, err := lethe.Clean(context.Background(), lethe.Options{
+    DryRun:  true,
+    MaxRisk: lethe.RiskRisky,
+    Logger:  lethe.NewTextLogger(os.Stdout),
+    Advanced: &lethe.AdvancedOptions{
+        Parallel: true,
+        Backup: &lethe.BackupOptions{Dir: "/tmp/backup"},
+    },
+})
+ok, err := lethe.Verify(context.Background(), lethe.RiskSafe, nil)
+err = lethe.ShredFile(context.Background(), "/tmp/secret", 3)
+archive, err := lethe.Backup(context.Background(), "/tmp")
+err = lethe.Restore(context.Background(), "/tmp/backup.tar")
 ```
 
-See `sdk.go:14` for the public API.
+Risk levels are `lethe.RiskSafe` / `RiskRisky` / `RiskDestructive` (`RiskUndefined` defaults to `Risky`). `Logger` is `lethe.Logger` (`Log(Event)`) — use `lethe.NewTextLogger` or `lethe.NewJSONLogger`, with optional `AuditLog io.Writer`. See `sdk.go:1` for the full API.
 
 ## Development
 

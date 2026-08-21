@@ -1,5 +1,5 @@
 BINARY    := lethe
-VERSION   := 0.2.0
+VERSION   := 0.3.0
 LDFLAGS   := -s -w
 PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 

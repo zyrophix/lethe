@@ -3,6 +3,7 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -189,7 +190,7 @@ func TestRiskPolicyBlocksDestructive(t *testing.T) {
 	registerTestModule(reg, "linux", "testmod", risk.RiskDestructive, arts)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 

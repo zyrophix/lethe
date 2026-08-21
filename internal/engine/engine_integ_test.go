@@ -3,6 +3,7 @@
 package engine
 
 import (
+	"context"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -23,7 +24,7 @@ func TestEngineRunWithMockModule(t *testing.T) {
 	registerTestModule(reg, "linux", "testmod", risk.RiskSafe, arts)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -45,7 +46,7 @@ func TestEngineRunDryRunNoChanges(t *testing.T) {
 	registerTestModule(reg, "linux", "testmod", risk.RiskSafe, arts)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{DryRun: true}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{DryRun: true}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -67,7 +68,7 @@ func TestEngineRunRiskFiltering(t *testing.T) {
 	registerTestModule(reg, "linux", "testmod", risk.RiskSafe, arts)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -90,7 +91,7 @@ func TestEngineRunModuleFilter(t *testing.T) {
 	})
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{ModuleNames: []string{"module1"}}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{ModuleNames: []string{"module1"}}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -103,7 +104,7 @@ func TestEngineRunUnknownModule(t *testing.T) {
 	reg := module.NewRegistry()
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
 
-	err := eng.Run(RunOptions{ModuleNames: []string{"nonexistent"}})
+	err := eng.Run(context.Background(), RunOptions{ModuleNames: []string{"nonexistent"}})
 	if err == nil {
 		t.Error("expected error for unknown module")
 	}
@@ -122,7 +123,7 @@ func TestEngineRunWithBackup(t *testing.T) {
 	registerTestModule(reg, "linux", "testmod", risk.RiskSafe, arts)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{UseBackup: true, BackupDir: backupDir}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{UseBackup: true, BackupDir: backupDir}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -143,7 +144,7 @@ func TestEngineRunShred(t *testing.T) {
 	registerTestModule(reg, "linux", "testmod", risk.RiskSafe, arts)
 
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
-	if err := eng.Run(RunOptions{UseShred: true}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{UseShred: true}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -168,7 +169,7 @@ func TestEngineAllUserHomeExpansion(t *testing.T) {
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
 	eng.homes = []string{homeA, homeB, homeDir}
 
-	if err := eng.Run(RunOptions{}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -193,7 +194,7 @@ func TestEngineAllUserHomeExpansionDryRun(t *testing.T) {
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
 	eng.homes = []string{homeA}
 
-	if err := eng.Run(RunOptions{DryRun: true}); err != nil {
+	if err := eng.Run(context.Background(), RunOptions{DryRun: true}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 
@@ -297,7 +298,7 @@ func TestEngineNoModulesAvailable(t *testing.T) {
 	reg := module.NewRegistry()
 	eng := New(reg, risk.NewPolicy(risk.RiskSafe), &mockWriter{}, homeDir)
 
-	err := eng.Run(RunOptions{})
+	err := eng.Run(context.Background(), RunOptions{})
 	if err == nil {
 		t.Error("expected error when no modules available")
 	}
