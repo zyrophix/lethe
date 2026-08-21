@@ -1,6 +1,7 @@
 package darwin
 
 import (
+	"context"
 	"errors"
 	"os"
 	"os/exec"
@@ -16,8 +17,8 @@ type cmdRecorder struct {
 	fails int
 }
 
-func (r *cmdRecorder) fake() func(string, ...string) *exec.Cmd {
-	return func(name string, args ...string) *exec.Cmd {
+func (r *cmdRecorder) fake() func(context.Context, string, ...string) *exec.Cmd {
+	return func(_ context.Context, name string, args ...string) *exec.Cmd {
 		r.cmds = append(r.cmds, append([]string{name}, args...))
 		exit := 0
 		if len(r.cmds) <= r.fails {
@@ -28,7 +29,13 @@ func (r *cmdRecorder) fake() func(string, ...string) *exec.Cmd {
 }
 
 func helperCmd(exitCode int) *exec.Cmd {
-	cmd := exec.Command(os.Args[0], "-test.run=TestHelperProcess")
+	return helperCmdCtx(context.Background(), exitCode)
+}
+
+// helperCmdCtx builds a helper process bound to ctx, so Run honors
+// cancellation the same way CommandContext does in production code.
+func helperCmdCtx(ctx context.Context, exitCode int) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=TestHelperProcess")
 	cmd.Env = append(os.Environ(), "LETHE_HELPER_EXIT="+strconv.Itoa(exitCode))
 	return cmd
 }
@@ -60,6 +67,31 @@ func TestMacosCleanDryRun(t *testing.T) {
 	}
 	if len(rec.cmds) != 0 {
 		t.Errorf("expected no commands in dry-run, got %v", rec.cmds)
+	}
+}
+
+func TestMacosCleanCancelledContext(t *testing.T) {
+	origExec, origRoot := execCommand, checkRoot
+	defer func() { execCommand, checkRoot = origExec, origRoot }()
+	var gotCtx context.Context
+	execCommand = func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		if gotCtx == nil {
+			gotCtx = ctx
+		}
+		return helperCmdCtx(ctx, 0)
+	}
+	checkRoot = rootAllowed()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := macosClean(module.Context{StdCtx: ctx}); err == nil {
+		t.Fatal("expected error with cancelled context")
+	}
+	if gotCtx == nil {
+		t.Fatal("execCommand did not receive StdCtx")
+	}
+	if gotCtx.Err() == nil {
+		t.Error("expected propagated ctx to be cancelled")
 	}
 }
 

@@ -1,6 +1,7 @@
 package windows
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,10 +11,12 @@ import (
 	"github.com/zyrophix/lethe/internal/module"
 )
 
-var execCommand = exec.Command
+var execCommand = func(ctx context.Context, name string, args ...string) *exec.Cmd {
+	return exec.CommandContext(ctx, name, args...)
+}
 
-func runCmd(name string, args ...string) error {
-	out, err := execCommand(name, args...).CombinedOutput()
+func runCmd(ctx context.Context, name string, args ...string) error {
+	out, err := execCommand(ctx, name, args...).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s %s: %s", name, strings.Join(args, " "), strings.TrimSpace(string(out)))
 	}
@@ -25,10 +28,10 @@ func usnClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	if err := runCmd("fsutil", "usn", "deletejournal", "/D", "C:"); err != nil {
+	if err := runCmd(ctx.Ctx(), "fsutil", "usn", "deletejournal", "/D", "C:"); err != nil {
 		return err
 	}
-	if err := execCommand("fsutil", "usn", "readjournal", "C:").Run(); err == nil {
+	if err := execCommand(ctx.Ctx(), "fsutil", "usn", "readjournal", "C:").Run(); err == nil {
 		return fmt.Errorf("USN journal still present after delete")
 	}
 	return nil
@@ -39,7 +42,7 @@ func pagefileClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	if err := runCmd("reg", "add",
+	if err := runCmd(ctx.Ctx(), "reg", "add",
 		`HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management`,
 		"/v", "ClearPageFileAtShutdown", "/t", "REG_DWORD", "/d", "1", "/f"); err != nil {
 		return err

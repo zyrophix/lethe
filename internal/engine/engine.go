@@ -258,6 +258,7 @@ func (e *Engine) runModule(ctx context.Context, m module.Module) {
 		Debug:   e.debug,
 		Backup:  e.backup != nil,
 		Shred:   e.useShred,
+		StdCtx:  ctx,
 	}
 	if err := m.CustomClean(cctx); err != nil {
 		e.writer.Error(fmt.Sprintf("[%s] custom clean failed: %v", m.Name(), err))

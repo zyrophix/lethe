@@ -1,6 +1,7 @@
 package module
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -97,6 +98,19 @@ type Context struct {
 	Parallel  bool
 	HomeDir   string
 	Debug     bool
+	// StdCtx carries cancellation for custom cleans running system
+	// commands. Never nil: the engine always sets it (defaults to
+	// context.Background()).
+	StdCtx context.Context
+}
+
+// Ctx returns StdCtx, falling back to context.Background() when unset
+// (e.g. in tests constructing Context literals directly).
+func (c Context) Ctx() context.Context {
+	if c.StdCtx == nil {
+		return context.Background()
+	}
+	return c.StdCtx
 }
 
 type Module interface {

@@ -1,6 +1,7 @@
 package darwin
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,8 +13,8 @@ import (
 )
 
 // execCommand is injectable for tests.
-var execCommand = func(name string, args ...string) *exec.Cmd {
-	return exec.Command(name, args...)
+var execCommand = func(ctx context.Context, name string, args ...string) *exec.Cmd {
+	return exec.CommandContext(ctx, name, args...)
 }
 
 var checkRoot = func() error {
@@ -30,16 +31,16 @@ func macosClean(ctx module.Context) error {
 	if err := checkRoot(); err != nil {
 		return err
 	}
-	if err := execCommand("find", "/", "-name", ".DS_Store", "-delete").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "find", "/", "-name", ".DS_Store", "-delete").Run(); err != nil {
 		return fmt.Errorf("find .DS_Store: %w", err)
 	}
-	if err := execCommand("find", "/Users/*/.Trash", "-mindepth", "1", "-delete").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "find", "/Users/*/.Trash", "-mindepth", "1", "-delete").Run(); err != nil {
 		return fmt.Errorf("clear all users trash: %w", err)
 	}
-	if err := execCommand("mdutil", "-E", "/").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "mdutil", "-E", "/").Run(); err != nil {
 		return fmt.Errorf("mdutil -E: %w", err)
 	}
-	if err := execCommand("qlmanage", "-r", "cache").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "qlmanage", "-r", "cache").Run(); err != nil {
 		return fmt.Errorf("qlmanage reset: %w", err)
 	}
 	return nil
@@ -52,10 +53,10 @@ func auditDarwinClean(ctx module.Context) error {
 	if err := checkRoot(); err != nil {
 		return err
 	}
-	if err := execCommand("audit", "-t").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "audit", "-t").Run(); err != nil {
 		return fmt.Errorf("audit -t: %w", err)
 	}
-	if err := execCommand("audit", "-s").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "audit", "-s").Run(); err != nil {
 		return fmt.Errorf("audit -s: %w", err)
 	}
 	return nil
@@ -71,7 +72,7 @@ func unifiedClean(ctx module.Context) error {
 	if err := gateUnifiedLogs(); err != nil {
 		return err
 	}
-	return execCommand("log", "erase", "--all").Run()
+	return execCommand(ctx.Ctx(), "log", "erase", "--all").Run()
 }
 
 func usageClean(ctx module.Context) error {
@@ -79,7 +80,7 @@ func usageClean(ctx module.Context) error {
 		return nil
 	}
 	for _, key := range []string{"RecentDocuments", "RecentApplications", "RecentServers"} {
-		if err := execCommand("defaults", "delete", "com.apple.recentitems", key).Run(); err != nil {
+		if err := execCommand(ctx.Ctx(), "defaults", "delete", "com.apple.recentitems", key).Run(); err != nil {
 			return fmt.Errorf("defaults delete %s: %w", key, err)
 		}
 	}
@@ -94,7 +95,7 @@ func fseventsClean(ctx module.Context) error {
 	if err := checkRoot(); err != nil {
 		return err
 	}
-	return execCommand("find", "/", "-name", ".fseventsd", "-type", "d", "-exec", "rm", "-rf", "{}", "+").Run()
+	return execCommand(ctx.Ctx(), "find", "/", "-name", ".fseventsd", "-type", "d", "-exec", "rm", "-rf", "{}", "+").Run()
 }
 
 // macosVersion returns the numeric macOS version (e.g. 10.15.7, 13.2) or "".

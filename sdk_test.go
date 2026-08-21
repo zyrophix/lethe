@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 )
 
@@ -171,6 +172,71 @@ func TestVerifyResultsPerArtifact(t *testing.T) {
 func TestVerifyResultsUnknownModule(t *testing.T) {
 	if _, err := VerifyResults(context.Background(), RiskSafe, []string{"no_such_module"}); err == nil {
 		t.Fatal("expected error for unknown module")
+	}
+}
+
+type recordingLogger struct {
+	mu     sync.Mutex
+	events []Event
+}
+
+func (l *recordingLogger) Log(e Event) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.events = append(l.events, e)
+}
+
+func TestVerifyResultsOptsStreamsToLogger(t *testing.T) {
+	rec := &recordingLogger{}
+	results, err := VerifyResultsOpts(context.Background(), VerifyOptions{
+		MaxRisk: RiskSafe,
+		Logger:  rec,
+	})
+	if err != nil {
+		t.Fatalf("VerifyResultsOpts: %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatal("expected results")
+	}
+	rec.mu.Lock()
+	defer rec.mu.Unlock()
+	if len(rec.events) != len(results) {
+		t.Fatalf("expected %d streamed events, got %d", len(results), len(rec.events))
+	}
+	for i, e := range rec.events {
+		if e.Action != "verify" {
+			t.Errorf("event %d: action = %q, want verify", i, e.Action)
+		}
+		if e.Artifact != results[i].Path {
+			t.Errorf("event %d: artifact = %q, want %q", i, e.Artifact, results[i].Path)
+		}
+		wantLevel := LevelSuccess
+		if !results[i].Cleaned {
+			wantLevel = LevelWarning
+		}
+		if e.Level != wantLevel {
+			t.Errorf("event %d: level = %q, want %q", i, e.Level, wantLevel)
+		}
+		if e.Timestamp.IsZero() {
+			t.Errorf("event %d: timestamp should be set", i)
+		}
+	}
+}
+
+func TestVerifyResultsOptsUnknownModule(t *testing.T) {
+	if _, err := VerifyResultsOpts(context.Background(), VerifyOptions{
+		MaxRisk: RiskSafe,
+		Modules: []string{"no_such_module"},
+	}); err == nil {
+		t.Fatal("expected error for unknown module")
+	}
+}
+
+func TestVerifyResultsOptsContextCancel(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := VerifyResultsOpts(ctx, VerifyOptions{MaxRisk: RiskSafe}); err == nil {
+		t.Fatal("expected error for cancelled context")
 	}
 }
 

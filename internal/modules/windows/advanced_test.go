@@ -1,6 +1,7 @@
 package windows
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 func TestUSNCleanDryRun(t *testing.T) {
 	orig := execCommand
-	execCommand = func(name string, args ...string) *exec.Cmd {
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
 		t.Fatal("execCommand should not run in dry-run")
 		return nil
 	}
@@ -26,7 +27,7 @@ func TestUSNCleanRunsCommand(t *testing.T) {
 	var got [][]string
 	calls := 0
 	orig := execCommand
-	execCommand = func(name string, args ...string) *exec.Cmd {
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
 		got = append(got, append([]string{name}, args...))
 		calls++
 		// deletejournal succeeds; readjournal fails (journal gone).
@@ -56,7 +57,7 @@ func TestUSNCleanRunsCommand(t *testing.T) {
 
 func TestUSNCleanError(t *testing.T) {
 	orig := execCommand
-	execCommand = func(name string, args ...string) *exec.Cmd {
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
 		return fakeCmd(1)
 	}
 	defer func() { execCommand = orig }()
@@ -70,7 +71,7 @@ func TestUSNCleanVerifyJournalStillPresent(t *testing.T) {
 	// deletejournal succeeds, readjournal succeeds -> journal still present.
 	calls := 0
 	orig := execCommand
-	execCommand = func(name string, args ...string) *exec.Cmd {
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
 		calls++
 		return fakeCmd(0)
 	}
@@ -86,7 +87,7 @@ func TestUSNCleanVerifyJournalStillPresent(t *testing.T) {
 
 func TestPagefileCleanDryRun(t *testing.T) {
 	orig := execCommand
-	execCommand = func(name string, args ...string) *exec.Cmd {
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
 		t.Fatal("execCommand should not run in dry-run")
 		return nil
 	}
@@ -97,10 +98,58 @@ func TestPagefileCleanDryRun(t *testing.T) {
 	}
 }
 
+func TestUSNCleanCancelledContext(t *testing.T) {
+	var gotCtx context.Context
+	orig := execCommand
+	execCommand = func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		if gotCtx == nil {
+			gotCtx = ctx
+		}
+		cmd := fakeCmd(0)
+		return exec.CommandContext(ctx, cmd.Path, cmd.Args[1:]...)
+	}
+	defer func() { execCommand = orig }()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := usnClean(module.Context{StdCtx: ctx}); err == nil {
+		t.Fatal("expected error with cancelled context")
+	}
+	if gotCtx == nil {
+		t.Fatal("execCommand did not receive StdCtx")
+	}
+	if gotCtx.Err() == nil {
+		t.Error("expected propagated ctx to be cancelled")
+	}
+}
+
+func TestShadowsCleanRunsVssadmin(t *testing.T) {
+	var got [][]string
+	orig := execCommand
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
+		got = append(got, append([]string{name}, args...))
+		return fakeCmd(0)
+	}
+	defer func() { execCommand = orig }()
+
+	if err := shadowsClean(module.Context{}); err != nil {
+		t.Fatalf("shadowsClean: %v", err)
+	}
+	want := []string{"vssadmin", "delete", "shadows", "/all", "/quiet"}
+	if len(got) != 1 || len(got[0]) != len(want) {
+		t.Fatalf("expected %v, got %v", want, got)
+	}
+	for i := range want {
+		if got[0][i] != want[i] {
+			t.Errorf("arg %d: got %q, want %q", i, got[0][i], want[i])
+		}
+	}
+}
+
 func TestPagefileCleanRunsCommand(t *testing.T) {
 	var got []string
 	orig := execCommand
-	execCommand = func(name string, args ...string) *exec.Cmd {
+	execCommand = func(_ context.Context, name string, args ...string) *exec.Cmd {
 		got = append(got, append([]string{name}, args...)...)
 		return fakeCmd(0)
 	}

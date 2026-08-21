@@ -1,6 +1,7 @@
 package linux
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -10,28 +11,33 @@ import (
 	"github.com/zyrophix/lethe/internal/risk"
 )
 
+// execCommand is injectable for tests.
+var execCommand = func(ctx context.Context, name string, args ...string) *exec.Cmd {
+	return exec.CommandContext(ctx, name, args...)
+}
+
 func shellClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	return exec.Command("bash", "-c", "history -c && unset HISTFILE").Run()
+	return execCommand(ctx.Ctx(), "bash", "-c", "history -c && unset HISTFILE").Run()
 }
 
 func logsClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	return exec.Command("journalctl", "--vacuum-size=1K", "--vacuum-time=1s").Run()
+	return execCommand(ctx.Ctx(), "journalctl", "--vacuum-size=1K", "--vacuum-time=1s").Run()
 }
 
 func auditClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	if err := exec.Command("auditctl", "-D").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "auditctl", "-D").Run(); err != nil {
 		return fmt.Errorf("auditctl -D: %w", err)
 	}
-	if err := exec.Command("systemctl", "restart", "auditd").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "systemctl", "restart", "auditd").Run(); err != nil {
 		return fmt.Errorf("restart auditd: %w", err)
 	}
 	return nil
@@ -41,10 +47,10 @@ func networkClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	if err := exec.Command("ip", "neigh", "flush", "all").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "ip", "neigh", "flush", "all").Run(); err != nil {
 		return fmt.Errorf("flush arp: %w", err)
 	}
-	if err := exec.Command("nmcli", "connection", "reload").Run(); err != nil {
+	if err := execCommand(ctx.Ctx(), "nmcli", "connection", "reload").Run(); err != nil {
 		return fmt.Errorf("nmcli reload: %w", err)
 	}
 	return nil
@@ -53,14 +59,14 @@ func networkClean(ctx module.Context) error {
 func sshClean(ctx module.Context) error {
 	for _, logPath := range []string{"/var/log/auth.log", "/var/log/secure"} {
 		if ctx.DryRun {
-			out, err := exec.Command("grep", "-c", `sshd\[`, logPath).Output()
+			out, err := execCommand(ctx.Ctx(), "grep", "-c", `sshd\[`, logPath).Output()
 			if err == nil {
 				count := strings.TrimSpace(string(out))
 				return fmt.Errorf("would remove %s sshd entries from %s", count, logPath)
 			}
 			continue
 		}
-		if err := exec.Command("sed", "-i", `/sshd\[/d`, logPath).Run(); err != nil {
+		if err := execCommand(ctx.Ctx(), "sed", "-i", `/sshd\[/d`, logPath).Run(); err != nil {
 			return fmt.Errorf("sed %s: %w", logPath, err)
 		}
 	}

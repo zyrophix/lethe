@@ -352,6 +352,14 @@ type VerifyResult struct {
 	Reason  string    `json:"reason,omitempty"`
 }
 
+// VerifyOptions configures artifact verification.
+type VerifyOptions struct {
+	MaxRisk RiskLevel // RiskUndefined defaults to RiskRisky
+	Modules []string  // empty means all platform modules
+	// Logger receives one Event per artifact as verification progresses.
+	Logger Logger
+}
+
 // Verify checks that forensic traces were cleaned. Returns true when all
 // artifacts are clean. For per-artifact details use VerifyResults.
 func Verify(ctx context.Context, maxRisk RiskLevel, modules []string) (bool, error) {
@@ -369,23 +377,29 @@ func Verify(ctx context.Context, maxRisk RiskLevel, modules []string) (bool, err
 
 // VerifyResults verifies artifacts and returns per-artifact results.
 func VerifyResults(ctx context.Context, maxRisk RiskLevel, modules []string) ([]VerifyResult, error) {
+	return VerifyResultsOpts(ctx, VerifyOptions{MaxRisk: maxRisk, Modules: modules})
+}
+
+// VerifyResultsOpts verifies artifacts with full options and streams each
+// result to opts.Logger (if set) as events arrive.
+func VerifyResultsOpts(ctx context.Context, opts VerifyOptions) ([]VerifyResult, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	if maxRisk == RiskUndefined {
-		maxRisk = RiskRisky
+	if opts.MaxRisk == RiskUndefined {
+		opts.MaxRisk = RiskRisky
 	}
 
 	registry := newRegistry()
-	policy := risk.NewPolicy(toInternalRisk(maxRisk))
+	policy := risk.NewPolicy(toInternalRisk(opts.MaxRisk))
 
 	mods := registry.ListForPlatform(module.CurrentPlatform())
-	if len(modules) > 0 {
+	if len(opts.Modules) > 0 {
 		var filtered []module.Module
-		for _, name := range modules {
+		for _, name := range opts.Modules {
 			m, ok := registry.GetForPlatform(module.CurrentPlatform(), name)
 			if !ok {
 				return nil, fmt.Errorf("unknown module: %s", name)
@@ -412,13 +426,29 @@ func VerifyResults(ctx context.Context, maxRisk RiskLevel, modules []string) ([]
 	internal := engine.VerifyAll(artifacts, platform.UserHomes(homeDir))
 	results := make([]VerifyResult, 0, len(internal))
 	for _, r := range internal {
-		results = append(results, VerifyResult{
+		vr := VerifyResult{
 			Path:    r.Artifact.Path,
 			Method:  r.Artifact.Method,
 			Risk:    fromInternalRisk(r.Artifact.GetRisk()),
 			Cleaned: r.Cleaned,
 			Reason:  r.Reason,
-		})
+		}
+		results = append(results, vr)
+
+		if opts.Logger != nil {
+			level := LevelSuccess
+			if !vr.Cleaned {
+				level = LevelWarning
+			}
+			opts.Logger.Log(Event{
+				Timestamp: time.Now(),
+				Level:     level,
+				Artifact:  vr.Path,
+				Action:    "verify",
+				Risk:      vr.Risk,
+				Message:   vr.Reason,
+			})
+		}
 	}
 	return results, nil
 }

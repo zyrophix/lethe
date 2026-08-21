@@ -11,5 +11,5 @@ func shadowsClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	return runCmd("vssadmin", "delete", "shadows", "/all", "/quiet")
+	return runCmd(ctx.Ctx(), "vssadmin", "delete", "shadows", "/all", "/quiet")
 }

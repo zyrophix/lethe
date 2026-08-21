@@ -15,7 +15,7 @@ func eventsClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	out, err := exec.Command("wevtutil", "el").Output()
+	out, err := exec.CommandContext(ctx.Ctx(), "wevtutil", "el").Output()
 	if err != nil {
 		return fmt.Errorf("list event logs: %w", err)
 	}
@@ -25,7 +25,7 @@ func eventsClean(ctx module.Context) error {
 		if logName == "" {
 			continue
 		}
-		if err := exec.Command("wevtutil", "cl", logName).Run(); err != nil {
+		if err := exec.CommandContext(ctx.Ctx(), "wevtutil", "cl", logName).Run(); err != nil {
 			continue
 		}
 	}
@@ -36,7 +36,7 @@ func tempClean(ctx module.Context) error {
 	if ctx.DryRun {
 		return nil
 	}
-	if err := exec.Command("ipconfig", "/flushdns").Run(); err != nil {
+	if err := exec.CommandContext(ctx.Ctx(), "ipconfig", "/flushdns").Run(); err != nil {
 		return fmt.Errorf("flushdns: %w", err)
 	}
 	return nil
