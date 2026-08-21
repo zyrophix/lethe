@@ -1,5 +1,5 @@
 BINARY    := lethe
-VERSION   := 0.5.1
+VERSION   := 0.5.2
 LDFLAGS   := -s -w -X github.com/zyrophix/lethe/internal/cli.version=$(VERSION)
 PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 

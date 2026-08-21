@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-08-21
+
+### Fixed
+- `go install ...@vX.Y.Z` builds now report their real version instead of "dev" — the CLI falls back to Go module build info when ldflags are not applied
+
+### Note
+- The `v0.5.1` git tag was accidentally force-moved after publication, which broke `sum.golang.org` checksum verification for that version. It has been re-aligned to the original, checksum-pinned tree. Users should install `v0.5.2`.
+
 ## [0.5.1] - 2026-08-21
 
 ### Fixed
@@ -96,7 +104,8 @@ Security hardening from an independent code audit — all fixes are fail-closed:
 - Go SDK (`Clean`, `Verify`, `ShredFile`, `Backup`, `Restore`)
 - Docker E2E harness, GitHub Actions CI, golangci-lint
 
-[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/zyrophix/lethe/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/zyrophix/lethe/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/zyrophix/lethe/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zyrophix/lethe/compare/v0.3.1...v0.4.0
