@@ -78,7 +78,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("lethe v%s %s/%s\n", version, runtime.GOOS, runtime.GOARCH)
+		fmt.Printf("lethe v%s %s/%s\n", resolvedVersion(), runtime.GOOS, runtime.GOARCH)
 	},
 }
 
@@ -169,7 +169,7 @@ func runClean(cmd *cobra.Command, args []string) error {
 	}
 
 	if outputFmt == "json" {
-		fmt.Fprintf(os.Stderr, "Lethe v%s — WARNING: This tool permanently deletes forensic traces!\n", version)
+		fmt.Fprintf(os.Stderr, "Lethe v%s — WARNING: This tool permanently deletes forensic traces!\n", resolvedVersion())
 	} else {
 		printBanner()
 	}
@@ -325,7 +325,7 @@ func runRestore(cmd *cobra.Command, args []string) error {
 
 func printBanner() {
 	fmt.Println("================================================")
-	fmt.Printf("  Lethe — Anti-Forensics Trace Cleaner v%s\n", version)
+	fmt.Printf("  Lethe — Anti-Forensics Trace Cleaner v%s\n", resolvedVersion())
 	fmt.Println("================================================")
 	fmt.Println()
 	fmt.Println("  WARNING: This tool will permanently delete forensic traces!")

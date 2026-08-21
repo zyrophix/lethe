@@ -23,6 +23,7 @@ Security hardening from an independent code audit — all fixes are fail-closed:
 
 ### Changed
 - Docs: badge set updated (GoReport service retired → pkg.go.dev), artifact counts synced across README/GitHub metadata (358), platform matrix clarified (5 targets, Windows amd64), `--backup-dir` documented
+- Version reporting falls back to Go module build info, so binaries installed via `go install ...@v0.5.1` report their real version instead of "dev"
 
 ## [0.5.0] - 2026-08-21
 
