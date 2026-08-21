@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -24,7 +25,7 @@ func TestBackupFailureAbortsClean(t *testing.T) {
 	badBase := filepath.Join(blocker, "cannot-create-dir")
 
 	reg := module.NewRegistry()
-	registerSecModule(reg, "linux", "testmod", risk.RiskSafe, []module.Artifact{
+	registerSecModule(reg, runtime.GOOS, "testmod", risk.RiskSafe, []module.Artifact{
 		{Path: target, Method: "delete", Risk: "safe", Backup: true},
 	})
 
@@ -87,7 +88,7 @@ type riskGateModule struct {
 
 func (m *riskGateModule) Name() string                 { return "gatemod" }
 func (m *riskGateModule) Risk() risk.RiskLevel         { return m.riskLevel }
-func (m *riskGateModule) Platforms() []string          { return []string{"linux"} }
+func (m *riskGateModule) Platforms() []string          { return []string{runtime.GOOS} }
 func (m *riskGateModule) Artifacts() []module.Artifact { return nil }
 func (m *riskGateModule) CustomClean(ctx module.Context) error {
 	m.flag.hit()
@@ -138,7 +139,7 @@ func TestBackupCollectsAllHomes(t *testing.T) {
 	backupDir := t.TempDir()
 
 	reg := module.NewRegistry()
-	registerSecModule(reg, "linux", "testmod", risk.RiskSafe, []module.Artifact{
+	registerSecModule(reg, runtime.GOOS, "testmod", risk.RiskSafe, []module.Artifact{
 		{Path: "{{.HomeDir}}/.lethe-mh-test", Method: "delete", Risk: "safe", Backup: true},
 	})
 
