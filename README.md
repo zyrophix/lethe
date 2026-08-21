@@ -12,7 +12,7 @@ Cross-platform anti-forensics trace cleaner with risk-gated operations. Written 
 
 ## Features
 
-- **37 modules, 340 artifacts** across Linux (234), macOS (43), and Windows (63)
+- **37 modules, 358 artifacts** across Linux (236), macOS (49), and Windows (73)
 - **Risk gating**: every operation is `safe` / `risky` / `destructive`, filtered by `--max-risk`
 - **Backup/restore**: tar archive with path-traversal protection before destructive changes
 - **SQLite scrubbing**: `DELETE` + `VACUUM`, pure-Go driver (no CGO)

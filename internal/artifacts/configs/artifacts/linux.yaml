@@ -442,6 +442,14 @@
       method: truncate
       risk: safe
       description: "GTK bookmarks"
+    - path: "{{.HomeDir}}/.Xauthority"
+      method: delete
+      risk: safe
+      description: "X session authority file"
+    - path: "{{.HomeDir}}/.ICEauthority"
+      method: delete
+      risk: safe
+      description: "ICE session authority file"
     - path: "{{.HomeDir}}/.cache/tracker*"
       method: delete
       risk: safe

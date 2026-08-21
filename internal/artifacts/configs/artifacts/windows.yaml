@@ -243,6 +243,35 @@
       method: truncate
       risk: safe
       description: "Teams logs"
+    - path: "C:/Windows/System32/LogFiles/HTTPERR/*"
+      method: delete
+      risk: safe
+      description: "HTTP.sys error logs"
+    - path: "C:/Windows/Logs/CBS/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Component-Based Servicing logs"
+    - path: "C:/Windows/Logs/DISM/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "DISM logs"
+    - path: "C:/Windows/Logs/WindowsUpdate/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Windows Update logs"
+    - path: "C:/ProgramData/USOShared/Logs/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Update Session Orchestrator logs"
+    - path: "C:/ProgramData/Microsoft/Windows/WER/Temp/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Windows Error Reporting temp queue"
 
 - module: security
   risk: destructive
@@ -282,6 +311,16 @@
       risk: risky
       recursive: true
       description: "Defender ATP cache"
+    - path: "C:/ProgramData/Microsoft/Microsoft Defender/Support/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Defender MPLog support logs"
+    - path: "C:/inetpub/logs/LogFiles/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "IIS web server logs"
 
 - module: advanced
   risk: destructive
@@ -304,6 +343,15 @@
       backup: true
       locking_procs: ["AeLookupSvc.exe"]
       description: "Amcache (DESTRUCTIVE: application execution history)"
+    - path: "C:/Windows/INF/setupapi.dev.log"
+      method: delete
+      risk: risky
+      description: "Device install history log (setupapi)"
+    - path: "C:/Windows/LiveKernelReports/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Live kernel reports"
 
 - module: journal
   risk: destructive

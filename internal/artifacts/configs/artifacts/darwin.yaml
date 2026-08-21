@@ -33,6 +33,11 @@
       method: truncate
       risk: safe
       description: "Fish history"
+    - path: "{{.HomeDir}}/.bash_sessions/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "macOS Bash session histories"
 
 - module: macos
   risk: risky
@@ -92,6 +97,16 @@
       method: truncate
       risk: safe
       description: "Application firewall log"
+    - path: "{{.HomeDir}}/Library/Logs/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "User diagnostic logs"
+    - path: "{{.HomeDir}}/Library/Application Support/CrashReporter/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Crash reporter data"
     - path: "{{.HomeDir}}/Library/Application Support/Code/User/settings.json"
       method: delete
       risk: safe
@@ -144,6 +159,14 @@
       method: delete
       risk: risky
       description: "Safari history"
+    - path: "{{.HomeDir}}/Library/Safari/LastSession.plist"
+      method: delete
+      risk: safe
+      description: "Safari last session state"
+    - path: "{{.HomeDir}}/Library/Cookies/Cookies.binarycookies"
+      method: delete
+      risk: safe
+      description: "Safari cookies store"
     - path: "{{.HomeDir}}/Library/Caches/com.apple.Safari/*"
       method: delete
       risk: safe
@@ -222,3 +245,8 @@
       method: delete
       risk: risky
       description: "Notification center database"
+    - path: "{{.HomeDir}}/Library/Application Support/com.apple.sharedfilelist/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Recent apps/documents shared file lists"
