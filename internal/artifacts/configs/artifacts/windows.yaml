@@ -65,6 +65,11 @@
       risk: risky
       recursive: true
       description: "Vagrant temp files"
+    - path: "{{.LocalAppData}}/Microsoft/Terminal Server Client/Cache/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "RDP bitmap cache"
 
 - module: registry
   risk: destructive
@@ -113,6 +118,42 @@
       risk: destructive
       backup: true
       description: "ShimCache/AppCompat (DESTRUCTIVE)"
+    - path: "HKCU:\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\BagMRU"
+      method: wipe_registry
+      risk: risky
+      description: "Shellbags BagMRU"
+    - path: "HKCU:\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags"
+      method: wipe_registry
+      risk: risky
+      description: "Shellbags Bags"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\Shell\\BagMRU"
+      method: wipe_registry
+      risk: risky
+      description: "Shell BagMRU (legacy)"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\Shell\\Bags"
+      method: wipe_registry
+      risk: risky
+      description: "Shell Bags (legacy)"
+    - path: "HKCU:\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\MuiCache"
+      method: wipe_registry
+      risk: risky
+      description: "MUICache (program execution via Explorer)"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU"
+      method: wipe_registry
+      risk: risky
+      description: "Run dialog history (Win+R)"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery"
+      method: wipe_registry
+      risk: risky
+      description: "Explorer search history (WordWheelQuery)"
+    - path: "HKCU:\\Software\\Microsoft\\Internet Explorer\\TypedURLs"
+      method: wipe_registry
+      risk: safe
+      description: "IE typed URLs"
+    - path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU"
+      method: wipe_registry
+      risk: risky
+      description: "Last visited dialog MRU"
 
 - module: filesystem
   risk: risky
@@ -133,6 +174,30 @@
       method: delete
       risk: safe
       description: "Legacy thumbnail cache"
+    - path: "{{.SystemDrive}}/$Recycle.Bin/*"
+      method: delete
+      risk: safe
+      recursive: true
+      description: "Recycle Bin contents"
+    - path: "C:/ProgramData/Microsoft/Search/Data/Applications/Windows/Windows.edb"
+      method: delete
+      risk: risky
+      locking_procs: ["SearchIndexer.exe"]
+      description: "Windows Search database (Windows.edb)"
+    - path: "{{.SystemDrive}}/hiberfil.sys"
+      method: delete
+      risk: risky
+      description: "Hibernation file"
+    - path: "C:/Windows/System32/LogFiles/WMI/RtBackup/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "ETW RTBackup traces"
+    - path: "C:/ProgramData/Microsoft/Diagnosis/ETLLogs/*"
+      method: delete
+      risk: risky
+      recursive: true
+      description: "Windows Diagnostic ETL logs"
 
 - module: temp
   risk: risky
@@ -245,5 +310,9 @@
   artifacts: []
 
 - module: pagefile
+  risk: destructive
+  artifacts: []
+
+- module: shadows
   risk: destructive
   artifacts: []

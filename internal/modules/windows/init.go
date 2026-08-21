@@ -48,6 +48,7 @@ func RegisterAll(registry *module.Registry) {
 		"temp":     tempClean,
 		"journal":  usnClean,
 		"pagefile": pagefileClean,
+		"shadows":  shadowsClean,
 	}
 
 	modules := []struct {
@@ -63,6 +64,7 @@ func RegisterAll(registry *module.Registry) {
 		{"advanced", risk.RiskDestructive},
 		{"journal", risk.RiskDestructive},
 		{"pagefile", risk.RiskDestructive},
+		{"shadows", risk.RiskDestructive},
 	}
 
 	for _, m := range modules {

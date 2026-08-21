@@ -19,6 +19,7 @@ func ResolvePath(path, homeDir string) string {
 		"{{.UserProfile}}":     os.Getenv("USERPROFILE"),
 		"{{.Temp}}":            os.TempDir(),
 		"{{.SystemRoot}}":      os.Getenv("SystemRoot"),
+		"{{.SystemDrive}}":     os.Getenv("SystemDrive"),
 		"{{.ApacheLogDir}}":    platform.ApacheLogDir(distro),
 		"{{.PackageCacheDir}}": platform.PackageCacheDir(distro),
 	}

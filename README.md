@@ -1,27 +1,47 @@
 # Lethe
 
+[![CI](https://github.com/zyrophix/lethe/actions/workflows/ci.yml/badge.svg)](https://github.com/zyrophix/lethe/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/zyrophix/lethe)](https://github.com/zyrophix/lethe/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/zyrophix/lethe)](https://go.dev)
+[![License](https://img.shields.io/github/license/zyrophix/lethe)](./LICENSE)
+[![Go Report](https://goreportcard.com/badge/github.com/zyrophix/lethe)](https://goreportcard.com/report/github.com/zyrophix/lethe)
+
 Cross-platform anti-forensics trace cleaner with risk-gated operations. Written in Go as a safe, testable, and unique reimplementation of [evilsocket/nyx](https://github.com/evilsocket/nyx).
+
+> **Lethe** — river of oblivion in Greek mythology. The tool erases traces so forensics finds nothing.
 
 ## Features
 
-- **36 modules, 325 artifacts** across Linux (234), macOS (43), and Windows (48)
-- **Risk gating**: every operation is classified `safe` / `risky` / `destructive` and filtered by `--max-risk`
+- **37 modules, 340 artifacts** across Linux (234), macOS (43), and Windows (63)
+- **Risk gating**: every operation is `safe` / `risky` / `destructive`, filtered by `--max-risk`
 - **Backup/restore**: tar archive with path-traversal protection before destructive changes
-- **SQLite scrubbing**: DELETE + VACUUM, pure-Go driver (no CGO)
-- **Windows registry wipe**, NTFS USN journal removal, pagefile cleaning
+- **SQLite scrubbing**: `DELETE` + `VACUUM`, pure-Go driver (no CGO)
+- **Windows**: registry wipe (ShellBags, MUICache, RunMRU, ComDlg), NTFS USN journal, pagefile & shadow-copy (VSS) cleaning, Recycle Bin, Windows Search (`Windows.edb`), ETW traces
 - **All-user cleaning**: expands `{{.HomeDir}}` across every real user home (`platform.UserHomes`)
 - **SSD/CoW detection** with shred warnings (ZFS, Btrfs, F2FS, OCFS2)
 - **Extended options**: secure shred, timestomp, free-space wipe, xattr stripping
-- **Verify**: checks traces were actually cleaned (`lethe verify`, exit 1 on leftovers)
+- **Verify**: `lethe verify` checks traces are actually gone (exit 1 on leftovers)
 - **Dry-run, parallel modules, JSON output, audit log**
-- **Go SDK** for embedding (`lethe.Clean`, `lethe.Verify`, ...)
-- Static binary (~7.4MB), cross-compiled for 5 platforms, no dependencies
+- **Go SDK** (`lethe.Clean`, `lethe.Verify`, `lethe.ShredFile`, …)
+- Static binary (~7.4 MB), 5 platforms, no dependencies
+
+## Why Lethe?
+
+| Tool | Language | Platforms | Artifacts | Safety |
+|------|----------|-----------|-----------|--------|
+| **nyx** (upstream) | bash + PowerShell | Linux/macOS/Windows | ~200+ | no backup/verify, no tests |
+| **REDACT** | Python | Windows only | 255 | aggressive (RAM wipe, BitLocker header nuke) |
+| **BleachBit** | Python | Linux/Windows | — | GUI cleaner, no forensics focus |
+| **ShadowWipe / SATAN2** | C++/Rust | Windows / Linux+Win | — | covers VSS/shellbags **or** adds deception (fake logs) |
+| **Lethe** | **Go** | **Linux/macOS/Windows** | **340** | **risk-gated + backup + verify + 180+ tests + CI** |
+
+Lethe is the only cross-platform, statically-linked, test-covered cleaner with `safe/risky/destructive` gating, backup/restore and a verifiable `verify` step. It closes the Windows gap vs REDACT/ShadowWipe (VSS, Recycle Bin, ShellBags/BagMRU, MUICache, `Windows.edb`, ETW) without going into RAM-wiping or log-forging territory.
 
 ## Install
 
 ```sh
 go install github.com/zyrophix/lethe/cmd/lethe@latest
-# or a pinned version:
+# pinned version:
 go install github.com/zyrophix/lethe/cmd/lethe@v0.2.0
 ```
 
@@ -30,88 +50,120 @@ Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [
 From source:
 
 ```sh
-make build        # static binary at ./lethe
+make build          # static binary at ./lethe
 make cross-compile  # dist/lethe-<os>-<arch> for 5 platforms
 ```
 
-Go 1.26+, Linux/macOS/Windows.
+Requires Go 1.26+.
+
+## Quick start
+
+Always preview first:
+
+```sh
+lethe list
+lethe clean --dry-run --max-risk risky
+lethe clean --force --max-risk risky --backup
+lethe verify --max-risk risky   # exit 0 = clean, 1 = leftovers
+```
 
 ## Usage
 
-Always start with a dry-run to preview changes:
-
-```sh
-lethe clean --dry-run --max-risk risky
-lethe list                 # show modules + risk levels
-lethe clean --force        # actually clean (skips confirmation)
+```
+lethe clean   --dry-run --max-risk risky --modules shell,logs --parallel --shred --backup
+lethe verify  --max-risk risky --modules browser,ssh -o json
+lethe restore --backup-dir /path/to/backup.tar
+lethe list
 ```
 
 ### Clean options
 
 | Flag | Meaning |
 |------|---------|
-| `-n, --dry-run` | preview changes without applying them |
+| `-n, --dry-run` | preview without applying |
 | `-r, --max-risk` | `safe`, `risky` (default), or `destructive` |
 | `-m, --modules` | comma-separated module list |
 | `-p, --parallel` | run modules concurrently |
 | `-b, --backup` | back up artifacts before cleaning |
-| `-s, --shred` | secure-overwrite files before deletion |
+| `-s, --shred` | secure-overwrite before delete |
 | `--timestomp` | randomize timestamps after truncate |
 | `--wipe-free-space` | fill free space to destroy deleted data |
 | `--strip-xattr` | remove extended attributes |
 | `-o, --output` | `text` or `json` |
-| `--audit-log` | write an audit log to file |
-| `-f, --force` | skip confirmation prompts |
+| `--audit-log` | write audit log to file |
+| `-f, --force` | skip confirmation |
 | `-d, --debug` | verbose output |
 
-### Verify
+### Verify & Restore
 
 ```sh
 lethe verify --max-risk risky            # exit 0 if clean, 1 otherwise
 lethe verify --modules browser,ssh -o json
-```
-
-### Restore
-
-```sh
 lethe clean --backup
-lethe restore --backup-dir /path/to/backup
+lethe restore --backup-dir /tmp/lethe-backup-*.tar
 ```
+
+## Modules
+
+| Platform | Modules | Artifacts |
+|----------|---------|-----------|
+| **Linux** (20) | `shell`, `logs`, `audit`, `temp`, `network`, `user`, `package`, `browser`, `ssh`, `container`, `systemd`, `print`, `cicd`, `idsips`, `crypto`, `privacy`, `pentest`, `osint`, `iot`, `ml` | 234 |
+| **macOS** (7) | `shell`, `macos`, `audit`, `browser`, `unified`, `fileevents`, `usage` | 43 |
+| **Windows** (10) | `events`, `history`, `registry`, `filesystem`, `temp`, `security`, `advanced`, `journal`, `pagefile`, `shadows` | 63 |
+
+`events` = `wevtutil cl` for every log; `journal` = `fsutil usn deletejournal`; `pagefile` = `ClearPageFileAtShutdown` + delete; `shadows` = `vssadmin delete shadows /all /quiet`; `registry` includes ShellBags/BagMRU, MUICache, RunMRU, WordWheelQuery, TypedURLs, ComDlg MRUs, USBSTOR, BAM, ShimCache; `filesystem` includes Recycle Bin, `Windows.edb` (locked by `SearchIndexer.exe`), `hiberfil.sys`, ETW `RtBackup`/diagnostic logs, thumbcache.
+
+Run `lethe list` for per-module risk levels.
 
 ## Risk model
 
-- **safe**: user data removal that is low risk (temp files, caches, logs)
-- **risky**: forensic traces that can affect services if interrupted (audit, browser, network)
-- **destructive**: irreversible operations (crypto-key removal, free-space wipe) that require confirmation
+- **safe** — low-risk caches/logs (temp files, thumbcache, history)
+- **risky** — forensic traces that can affect services if interrupted (audit, browser, network, timeline)
+- **destructive** — irreversible (ShimCache/BAM/USBSTOR, Amcache, VSS, free-space wipe); requires confirmation and supports `--backup`
 
 Operations above `--max-risk` are skipped, never auto-approved.
 
 ## Go SDK
 
 ```go
-import "github.com/zyrophix/lethe"
+import (
+    "github.com/zyrophix/lethe"
+    "github.com/zyrophix/lethe/internal/risk"
+)
 
 res, err := lethe.Clean(lethe.Options{DryRun: true, MaxRisk: risk.RiskRisky})
 ok, err := lethe.Verify(risk.RiskSafe, nil)
-err := lethe.ShredFile("/tmp/secret", 3)
+err = lethe.ShredFile("/tmp/secret", 3)
+err = lethe.BackupAndClean(lethe.Options{MaxRisk: risk.RiskDestructive})
 ```
+
+See `sdk.go:14` for the public API.
 
 ## Development
 
 ```sh
 make test              # unit tests with -race
-make test-integration  # integration tests (linux)
+make test-integration  # integration tests (linux, tag integration)
 make vet
 make cross-compile
-make e2e               # Docker end-to-end against root modules (linux)
+make e2e               # Docker E2E against root modules (linux)
 ```
 
-E2E (`docker/e2e.sh`) builds a hardened Ubuntu container (caps, memory/CPU/pids limits, memory sampler with abort below 2048MB free) and verifies that marked artifacts in `ssh`, `audit`, `logs`, and `temp` modules are removed. Full run is logged to `docker/e2e.log`.
+E2E (`docker/e2e.sh`) builds a hardened Ubuntu container (caps, memory/CPU/pids limits, memory sampler aborting below 2048 MB free) and verifies `ssh`, `audit`, `logs`, `temp` artifacts are removed. Log: `docker/e2e.log`.
 
-CI (`.github/workflows/ci.yml`): test -race, cross-compile, integration, e2e-docker, golangci-lint.
+CI (`.github/workflows/ci.yml`): `test -race` + `cross-compile` + `integration` + `e2e-docker` + `windows` + `golangci-lint v2`.
 
 ## Safety notes
 
-- Run as root for system-level modules; non-root users get home-dir cleaning only
-- `--shred` on SSD/CoW filesystems is not guaranteed secure — a warning is shown (see `--strip-xattr` for metadata)
-- Always back up (`--backup`) before destructive runs
+- Run as root/Administrator for system-level modules; non-root gets home-dir cleaning only
+- `--shred` on SSD/CoW is not guaranteed — a warning is shown (see `--strip-xattr` for metadata)
+- Always `--backup` before `destructive` runs; restore with `lethe restore`
+- Verify after cleaning: `lethe verify` is the source of truth
+
+## Acknowledgements
+
+Based on the artifact coverage of [evilsocket/nyx](https://github.com/evilsocket/nyx) (GPL-3.0). Lethe is a from-scratch Go reimplementation with a different engine (risk gating, backup, verify, SDK, CI).
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
