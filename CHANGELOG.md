@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-21
+
+### Added
+- Cancellable custom cleans: `module.Context.StdCtx` (stdlib `context.Context`) propagated from the engine; all custom-clean system commands across Linux, macOS, and Windows now run via `exec.CommandContext` and abort on cancellation
+- SDK: `VerifyOptions{MaxRisk, Modules, Logger}` + `VerifyResultsOpts` streaming per-artifact verification events (`success`/`warning`) to a `Logger` as they are produced
+- Catalog expanded 340 → 358 artifacts: Windows Defender MPLog support logs, IIS LogFiles, `setupapi.dev.log`, LiveKernelReports, HTTPERR/CBS/DISM/WindowsUpdate/USOShared logs, WER Temp queue; macOS `.bash_sessions`, user `Library/Logs`, CrashReporter, sharedfilelist recents, Safari LastSession + binarycookies; Linux `.Xauthority`/`.ICEauthority`
+- Godoc examples (`ExampleClean`, `ExampleVerifyResults`, `ExampleShredFile`)
+- `CONTRIBUTING.md` and `SECURITY.md`
+
+### Changed
+- Platform `execCommand` test injectables now take `context.Context` as first argument
+- `wipeFreeSpace` is an `Engine` method honoring context cancellation (since 0.4.0)
+
 ## [0.4.0] - 2026-08-21
 
 ### Added
@@ -65,7 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Go SDK (`Clean`, `Verify`, `ShredFile`, `Backup`, `Restore`)
 - Docker E2E harness, GitHub Actions CI, golangci-lint
 
-[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/zyrophix/lethe/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zyrophix/lethe/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/zyrophix/lethe/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/zyrophix/lethe/compare/v0.2.0...v0.3.0

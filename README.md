@@ -42,7 +42,7 @@ Lethe is the only cross-platform, statically-linked, test-covered cleaner with `
 ```sh
 go install github.com/zyrophix/lethe/cmd/lethe@latest
 # pinned version:
-go install github.com/zyrophix/lethe/cmd/lethe@v0.4.0
+go install github.com/zyrophix/lethe/cmd/lethe@v0.5.0
 ```
 
 Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
