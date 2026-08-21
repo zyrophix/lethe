@@ -78,24 +78,36 @@ func TestRegistryListForPlatformMulti(t *testing.T) {
 
 func TestArtifactGetRisk(t *testing.T) {
 	a := Artifact{Risk: "destructive"}
-	if a.GetRisk() != risk.RiskDestructive {
-		t.Errorf("expected destructive, got %d", a.GetRisk())
+	rl, ok := a.GetRisk()
+	if !ok || rl != risk.RiskDestructive {
+		t.Errorf("expected destructive, got %d ok=%v", rl, ok)
 	}
 
+	// Fail closed: invalid risk must be reported, not silently mapped.
 	a2 := Artifact{Risk: "invalid"}
-	if a2.GetRisk() != risk.RiskSafe {
-		t.Errorf("expected safe fallback for invalid risk, got %d", a2.GetRisk())
+	if _, ok := a2.GetRisk(); ok {
+		t.Error("invalid risk must return ok=false")
+	}
+	a3 := Artifact{}
+	if _, ok := a3.GetRisk(); ok {
+		t.Error("empty risk must return ok=false")
 	}
 }
 
 func TestArtifactGetMethod(t *testing.T) {
 	a := Artifact{Method: "truncate"}
-	if a.GetMethod() != MethodTruncate {
-		t.Errorf("expected truncate, got %d", a.GetMethod())
+	m, ok := a.GetMethod()
+	if !ok || m != MethodTruncate {
+		t.Errorf("expected truncate, got %d ok=%v", m, ok)
 	}
 
+	// Fail closed: an unknown method must never coerce to delete.
 	a2 := Artifact{Method: "invalid"}
-	if a2.GetMethod() != MethodDelete {
-		t.Errorf("expected delete fallback for invalid method, got %d", a2.GetMethod())
+	if _, ok := a2.GetMethod(); ok {
+		t.Error("invalid method must return ok=false")
+	}
+	a3 := Artifact{}
+	if _, ok := a3.GetMethod(); ok {
+		t.Error("empty method must return ok=false")
 	}
 }

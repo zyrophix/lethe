@@ -262,7 +262,11 @@ func runVerify(cmd *cobra.Command, args []string) error {
 	for _, m := range mods {
 		all := m.Artifacts()
 		for i := range all {
-			if policy.Allowed(all[i].GetRisk()) {
+			riskLevel, ok := all[i].GetRisk()
+			if !ok {
+				continue
+			}
+			if policy.Allowed(riskLevel) {
 				artifacts = append(artifacts, all[i])
 			}
 		}
@@ -345,7 +349,8 @@ func confirmAction(w output.Writer, policy risk.Policy, maxRisk risk.RiskLevel, 
 
 	for _, m := range mods {
 		for _, a := range m.Artifacts() {
-			if a.GetRisk() == risk.RiskDestructive && policy.Allowed(risk.RiskDestructive) {
+			riskLevel, ok := a.GetRisk()
+			if ok && riskLevel == risk.RiskDestructive && policy.Allowed(risk.RiskDestructive) {
 				desc := a.Description
 				if desc == "" {
 					desc = a.Path

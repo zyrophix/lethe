@@ -182,7 +182,7 @@ func TestBackupNoBackupFlag(t *testing.T) {
 		{Path: "/tmp/somefile", Backup: false},
 	}
 
-	paths := b.collectExistingPaths(artifacts, "")
+	paths := b.collectExistingPaths(artifacts, []string{""})
 	if len(paths) != 0 {
 		t.Error("non-backup artifacts should be skipped")
 	}

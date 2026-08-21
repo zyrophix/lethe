@@ -86,7 +86,7 @@ func TestBackupSkipsNonBackupArtifacts(t *testing.T) {
 		t.Fatalf("backup create: %v", err)
 	}
 
-	paths := b.collectExistingPaths(artifacts, "")
+	paths := b.collectExistingPaths(artifacts, []string{""})
 	if len(paths) != 0 {
 		t.Errorf("backup=false artifacts should not be collected, got %d", len(paths))
 	}

@@ -2,6 +2,8 @@ package engine
 
 import (
 	"archive/tar"
+	crand "crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -11,6 +13,7 @@ import (
 	"time"
 
 	"github.com/zyrophix/lethe/internal/module"
+	"github.com/zyrophix/lethe/internal/platform"
 )
 
 type Backup struct {
@@ -27,9 +30,21 @@ func NewBackup(baseDir string) *Backup {
 		}
 	}
 	return &Backup{
-		Dir:     filepath.Join(baseDir, fmt.Sprintf("lethe-backup-%d", time.Now().Unix())),
+		Dir:     filepath.Join(baseDir, fmt.Sprintf("lethe-backup-%d-%s", time.Now().Unix(), randToken())),
 		created: time.Now(),
 	}
+}
+
+// randToken returns a short random hex token so concurrent runs and
+// local attackers cannot predict or pre-create the archive path.
+func randToken() string {
+	buf := make([]byte, 4)
+	if _, err := crand.Read(buf); err != nil {
+		// Fall back to time-based entropy; O_EXCL below still guards
+		// against symlink attacks.
+		return fmt.Sprintf("%x", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(buf)
 }
 
 func (b *Backup) Path() string {
@@ -37,7 +52,13 @@ func (b *Backup) Path() string {
 }
 
 func (b *Backup) Create(artifacts []module.Artifact, homeDir string) error {
-	paths := b.collectExistingPaths(artifacts, homeDir)
+	return b.CreateForHomes(artifacts, platform.UserHomes(homeDir))
+}
+
+// CreateForHomes archives every existing backup-flagged path expanded
+// over exactly the homes the engine will clean.
+func (b *Backup) CreateForHomes(artifacts []module.Artifact, homes []string) error {
+	paths := b.collectExistingPaths(artifacts, homes)
 	if len(paths) == 0 {
 		return nil
 	}
@@ -46,11 +67,15 @@ func (b *Backup) Create(artifacts []module.Artifact, homeDir string) error {
 		return fmt.Errorf("create backup dir: %w", err)
 	}
 
-	f, err := os.Create(b.Path())
+	// O_EXCL prevents symlink attacks: a pre-created
+	// lethe-backup-*.tar -> /etc/shadow link makes os.Create truncate
+	// the target. 0600 keeps archived secrets (keys, credentials)
+	// private on shared machines.
+	f, err := os.OpenFile(b.Path(), os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("create backup file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	tw := tar.NewWriter(f)
 	defer func() { _ = tw.Close() }()
@@ -173,7 +198,10 @@ func (b *Backup) Cleanup() error {
 	return os.Remove(b.Path())
 }
 
-func (b *Backup) collectExistingPaths(artifacts []module.Artifact, homeDir string) []string {
+// collectExistingPaths resolves backup-flagged artifacts across every
+// real user home (matching how the engine expands {{.HomeDir}} for
+// deletion), so nothing gets deleted without first entering the archive.
+func (b *Backup) collectExistingPaths(artifacts []module.Artifact, homes []string) []string {
 	var paths []string
 	seen := make(map[string]bool)
 
@@ -181,15 +209,24 @@ func (b *Backup) collectExistingPaths(artifacts []module.Artifact, homeDir strin
 		if !a.Backup {
 			continue
 		}
-		resolved := module.ResolvePath(a.Path, homeDir)
-		matches, err := filepath.Glob(resolved)
-		if err != nil {
+		expandedHomes := homes
+		if !strings.Contains(a.Path, "{{.HomeDir}}") {
+			expandedHomes = []string{""}
+		}
+		if len(expandedHomes) == 0 {
 			continue
 		}
-		for _, m := range matches {
-			if !seen[m] {
-				seen[m] = true
-				paths = append(paths, m)
+		for _, home := range expandedHomes {
+			resolved := module.ResolvePath(a.Path, home)
+			matches, err := filepath.Glob(resolved)
+			if err != nil {
+				continue
+			}
+			for _, m := range matches {
+				if !seen[m] {
+					seen[m] = true
+					paths = append(paths, m)
+				}
 			}
 		}
 	}

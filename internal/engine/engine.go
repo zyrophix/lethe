@@ -133,7 +133,13 @@ func (e *Engine) Run(ctx context.Context, opts RunOptions) error {
 	for _, m := range selected {
 		artifacts := m.Artifacts()
 		for i := range artifacts {
-			if e.policy.Allowed(artifacts[i].GetRisk()) {
+			riskLevel, ok := artifacts[i].GetRisk()
+			if !ok {
+				e.writer.Error(fmt.Sprintf("[%s] artifact %q has invalid risk %q — skipping (fail closed)", m.Name(), artifacts[i].Path, artifacts[i].Risk))
+				e.stats.IncFailed()
+				continue
+			}
+			if e.policy.Allowed(riskLevel) {
 				allArtifacts = append(allArtifacts, artifacts[i])
 			} else {
 				e.writer.Debug(m.Name(), fmt.Sprintf("skipping %s (risk=%s > max=%s)", artifacts[i].Path, artifacts[i].Risk, e.policy.MaxRisk))
@@ -155,22 +161,30 @@ func (e *Engine) Run(ctx context.Context, opts RunOptions) error {
 	if opts.UseBackup {
 		e.backup = NewBackup(opts.BackupDir)
 		if !opts.DryRun {
-			if err := e.backup.Create(allArtifacts, e.homeDir); err != nil {
-				e.writer.Warning(fmt.Sprintf("backup failed: %v", err))
-			} else {
-				e.writer.Info("backup", "backup created at "+e.backup.Path())
+			// Collect over exactly the homes that will be cleaned, so
+			// nothing is deleted without first entering the archive.
+			if err := e.backup.CreateForHomes(allArtifacts, e.homes); err != nil {
+				// A failed backup means the run would be irreversible.
+				// Never continue deleting without the safety net.
+				e.backup = nil
+				e.stats.Duration = time.Since(start)
+				return fmt.Errorf("backup failed — aborting clean (nothing was deleted): %w", err)
 			}
+			e.writer.Info("backup", "backup created at "+e.backup.Path())
 		}
 	}
 
 	if opts.Parallel {
 		var wg sync.WaitGroup
+		cancelled := false
 		for _, m := range selected {
 			select {
 			case <-ctx.Done():
-				e.stats.Duration = time.Since(start)
-				return ctx.Err()
+				cancelled = true
 			default:
+			}
+			if cancelled {
+				break
 			}
 			wg.Add(1)
 			go func(mod module.Module) {
@@ -183,12 +197,16 @@ func (e *Engine) Run(ctx context.Context, opts RunOptions) error {
 				}
 			}(m)
 		}
+		// Always wait for in-flight workers before returning, so no
+		// goroutine keeps mutating shared stats/writer after Run ends.
 		wg.Wait()
-		select {
-		case <-ctx.Done():
-			e.stats.Duration = time.Since(start)
-			return ctx.Err()
-		default:
+		if cancelled || ctx.Err() != nil {
+			select {
+			case <-ctx.Done():
+				e.stats.Duration = time.Since(start)
+				return ctx.Err()
+			default:
+			}
 		}
 	} else {
 		for _, m := range selected {
@@ -244,7 +262,13 @@ func (e *Engine) runModule(ctx context.Context, m module.Module) {
 			default:
 			}
 		}
-		if !e.policy.Allowed(artifacts[i].GetRisk()) {
+		riskLevel, ok := artifacts[i].GetRisk()
+		if !ok {
+			e.writer.Error(fmt.Sprintf("[%s] artifact %q has invalid risk %q — skipping (fail closed)", m.Name(), artifacts[i].Path, artifacts[i].Risk))
+			e.stats.IncFailed()
+			continue
+		}
+		if !e.policy.Allowed(riskLevel) {
 			e.stats.IncSkipped()
 			continue
 		}
@@ -259,6 +283,13 @@ func (e *Engine) runModule(ctx context.Context, m module.Module) {
 		Backup:  e.backup != nil,
 		Shred:   e.useShred,
 		StdCtx:  ctx,
+	}
+	// Custom cleans execute system commands not tied to individual
+	// artifacts (wevtutil, vssadmin, auditctl, ...), so they are gated
+	// by the module's declared risk level, fail closed.
+	if !e.policy.Allowed(m.Risk()) {
+		e.writer.Debug(m.Name(), fmt.Sprintf("custom clean skipped (module risk=%s > max=%s)", m.Risk(), e.policy.MaxRisk))
+		return
 	}
 	if err := m.CustomClean(cctx); err != nil {
 		e.writer.Error(fmt.Sprintf("[%s] custom clean failed: %v", m.Name(), err))
@@ -292,6 +323,13 @@ func (e *Engine) resolvePaths(path string) []string {
 }
 
 func (e *Engine) cleanResolvedPath(moduleName string, a module.Artifact, resolved string) {
+	riskLevel, riskOK := a.GetRisk()
+	if !riskOK {
+		e.writer.Error(fmt.Sprintf("[%s] artifact %q has invalid risk %q — skipping (fail closed)", moduleName, a.Path, a.Risk))
+		e.stats.IncFailed()
+		return
+	}
+
 	matches, err := filepath.Glob(resolved)
 	if err != nil {
 		e.writer.Debug(moduleName, fmt.Sprintf("invalid glob %s: %v", resolved, err))
@@ -303,6 +341,16 @@ func (e *Engine) cleanResolvedPath(moduleName string, a module.Artifact, resolve
 			e.writer.Debug(moduleName, "no match for "+resolved)
 		}
 		return
+	}
+
+	method, methodOK := a.GetMethod()
+	if !methodOK {
+		e.writer.Error(fmt.Sprintf("[%s] artifact %q has invalid method %q — skipping (fail closed)", moduleName, a.Path, a.Method))
+		e.stats.IncFailed()
+		return
+	}
+	if e.useShred && (method == module.MethodDelete) {
+		method = module.MethodShred
 	}
 
 	for _, m := range matches {
@@ -348,14 +396,9 @@ func (e *Engine) cleanResolvedPath(moduleName string, a module.Artifact, resolve
 		}
 
 		if e.dryRun {
-			e.writer.Success(moduleName, m, "would "+a.Method, a.GetRisk())
+			e.writer.Success(moduleName, m, "would "+a.Method, riskLevel)
 			e.stats.IncCleaned()
 			continue
-		}
-
-		method := a.GetMethod()
-		if e.useShred && (method == module.MethodDelete) {
-			method = module.MethodShred
 		}
 
 		var actionErr error
@@ -382,7 +425,7 @@ func (e *Engine) cleanResolvedPath(moduleName string, a module.Artifact, resolve
 			e.writer.Error(fmt.Sprintf("[%s] failed to %s %s: %v", moduleName, a.Method, m, actionErr))
 			e.stats.IncFailed()
 		} else {
-			e.writer.Success(moduleName, m, a.Method, a.GetRisk())
+			e.writer.Success(moduleName, m, a.Method, riskLevel)
 			e.stats.IncCleaned()
 
 			if e.stripXattr {
@@ -485,12 +528,14 @@ func isNoSpace(err error) bool {
 }
 
 func (e *Engine) deletePath(path string, recursive bool) error {
-	if recursive {
-		return os.RemoveAll(path)
-	}
 	info, err := os.Stat(path)
 	if err != nil {
 		return err
+	}
+	if info.IsDir() && !recursive {
+		// recursive:false is a promise not to descend; honor it even
+		// for directories instead of silently expanding scope.
+		return fmt.Errorf("refusing non-recursive delete of directory %s (set recursive: true)", path)
 	}
 	if info.IsDir() {
 		return os.RemoveAll(path)

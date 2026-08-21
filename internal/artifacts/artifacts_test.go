@@ -72,8 +72,7 @@ func TestAllRiskLevelsValid(t *testing.T) {
 					if _, err := module.ParseCleanMethod(a.Method); err != nil {
 						t.Errorf("%s/%s artifact[%d]: invalid method %q", platform, g.Module, i, a.Method)
 					}
-					rl := a.GetRisk()
-					if rl < 0 || rl > 2 {
+					if _, ok := a.GetRisk(); !ok {
 						t.Errorf("%s/%s artifact[%d]: invalid risk level %q", platform, g.Module, i, a.Risk)
 					}
 				}
@@ -111,8 +110,12 @@ func TestDestructiveArtifactsHaveBackup(t *testing.T) {
 			}
 			for _, g := range groups {
 				for i, a := range g.Artifacts {
-					if a.GetRisk() == 2 && !a.Backup {
+					rl, ok := a.GetRisk()
+					if ok && rl == 2 && !a.Backup {
 						t.Errorf("%s/%s artifact[%d] (%s): destructive without backup=true", platform, g.Module, i, a.Path)
+					}
+					if !ok {
+						t.Errorf("%s/%s artifact[%d]: invalid risk %q", platform, g.Module, i, a.Risk)
 					}
 				}
 			}

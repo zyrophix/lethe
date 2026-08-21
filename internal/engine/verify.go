@@ -33,7 +33,17 @@ func verifyArtifacts(artifacts []module.Artifact, homes []string) []VerifyResult
 	for _, a := range artifacts {
 		result := VerifyResult{Artifact: a}
 
-		switch a.GetMethod() {
+		method, ok := a.GetMethod()
+		if !ok {
+			// Fail closed: an unknown method was never executed, but we
+			// cannot claim the artifact is clean either.
+			result.Cleaned = false
+			result.Reason = fmt.Sprintf("invalid method %q — cannot verify", a.Method)
+			results = append(results, result)
+			continue
+		}
+
+		switch method {
 		case module.MethodTruncate:
 			result = verifyTruncate(a, resolveForVerify(a, homes))
 		case module.MethodDelete, module.MethodShred:
@@ -121,8 +131,22 @@ func verifySQLite(a module.Artifact, paths []string) VerifyResult {
 		return VerifyResult{Artifact: a, Cleaned: false, Reason: "sqlite_table not specified"}
 	}
 
+	// Expand globs so wildcarded database paths are actually inspected
+	// instead of silently reporting "database does not exist".
+	var expanded []string
+	for _, p := range paths {
+		matches, err := filepath.Glob(p)
+		if err != nil {
+			continue
+		}
+		expanded = append(expanded, matches...)
+	}
+	if len(expanded) == 0 {
+		expanded = paths
+	}
+
 	var matched bool
-	for _, resolved := range paths {
+	for _, resolved := range expanded {
 		if _, err := os.Stat(resolved); os.IsNotExist(err) {
 			continue
 		}

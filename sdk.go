@@ -412,7 +412,11 @@ func VerifyResultsOpts(ctx context.Context, opts VerifyOptions) ([]VerifyResult,
 	var artifacts []module.Artifact
 	for _, m := range mods {
 		for _, a := range m.Artifacts() {
-			if policy.Allowed(a.GetRisk()) {
+			riskLevel, ok := a.GetRisk()
+			if !ok {
+				continue // fail closed: unknown risk is never verified as clean
+			}
+			if policy.Allowed(riskLevel) {
 				artifacts = append(artifacts, a)
 			}
 		}
@@ -426,10 +430,11 @@ func VerifyResultsOpts(ctx context.Context, opts VerifyOptions) ([]VerifyResult,
 	internal := engine.VerifyAll(artifacts, platform.UserHomes(homeDir))
 	results := make([]VerifyResult, 0, len(internal))
 	for _, r := range internal {
+		riskLevel, _ := r.Artifact.GetRisk()
 		vr := VerifyResult{
 			Path:    r.Artifact.Path,
 			Method:  r.Artifact.Method,
-			Risk:    fromInternalRisk(r.Artifact.GetRisk()),
+			Risk:    fromInternalRisk(riskLevel),
 			Cleaned: r.Cleaned,
 			Reason:  r.Reason,
 		}

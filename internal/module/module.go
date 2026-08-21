@@ -73,20 +73,26 @@ type Artifact struct {
 	Description  string   `yaml:"description"`
 }
 
-func (a Artifact) GetRisk() risk.RiskLevel {
+// GetRisk parses the declared risk level. It returns (RiskLevel, ok):
+// ok is false when the value is missing or invalid, and callers must
+// treat the artifact as unknown-risk (fail closed: skip it).
+func (a Artifact) GetRisk() (risk.RiskLevel, bool) {
 	rl, err := risk.ParseRiskLevel(a.Risk)
 	if err != nil {
-		return risk.RiskSafe
+		return risk.RiskSafe, false
 	}
-	return rl
+	return rl, true
 }
 
-func (a Artifact) GetMethod() CleanMethod {
+// GetMethod parses the declared clean method. It returns (CleanMethod, ok):
+// ok is false when the method is missing or invalid. Callers must skip
+// such artifacts — defaulting to delete would silently destroy data.
+func (a Artifact) GetMethod() (CleanMethod, bool) {
 	m, err := ParseCleanMethod(a.Method)
 	if err != nil {
-		return MethodDelete
+		return MethodDelete, false
 	}
-	return m
+	return m, true
 }
 
 type Context struct {

@@ -3,8 +3,8 @@
 [![CI](https://github.com/zyrophix/lethe/actions/workflows/ci.yml/badge.svg)](https://github.com/zyrophix/lethe/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/zyrophix/lethe)](https://github.com/zyrophix/lethe/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/zyrophix/lethe)](https://go.dev)
+[![Go Reference](https://pkg.go.dev/badge/github.com/zyrophix/lethe.svg)](https://pkg.go.dev/github.com/zyrophix/lethe)
 [![License](https://img.shields.io/github/license/zyrophix/lethe)](./LICENSE)
-[![Go Report](https://goreportcard.com/badge/github.com/zyrophix/lethe)](https://goreportcard.com/report/github.com/zyrophix/lethe)
 
 Cross-platform anti-forensics trace cleaner with risk-gated operations. Written in Go as a safe, testable, and unique reimplementation of [evilsocket/nyx](https://github.com/evilsocket/nyx).
 
