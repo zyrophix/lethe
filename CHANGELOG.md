@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-21
+
+### Fixed
+Security hardening from an independent code audit — all fixes are fail-closed:
+
+- **Risk/method classification no longer fails open**: an artifact with a missing or invalid `risk:` is skipped with an explicit error instead of being treated as `safe`; an invalid `method:` is never coerced to `delete`
+- **Custom cleans respect the risk policy**: module-level system commands (`auditctl`, `vssadmin`, `wevtutil`, …) do not run below the module's declared risk level
+- **Backup failure aborts cleaning**: if the archive cannot be created, the run stops with an error before deleting anything (previously it warned and continued with exit 0)
+- **Backup archive hardening**: created with `O_EXCL` and mode `0600` under an unpredictable random name — defeats symlink pre-creation attacks and local exposure of archived secrets
+- **Multi-home backup coverage**: backup collection expands over exactly the user homes that will be cleaned, so nothing is deleted without first entering the archive
+- **`recursive: false` is honored for directories**: non-recursive delete refuses directories instead of silently calling remove-all
+- **Parallel cancellation waits** for in-flight workers before returning; shared stats/writer are no longer touched after `Run` ends
+- **Verify inspects wildcarded SQLite paths** via glob expansion instead of reporting them "already clean"
+
+### Changed
+- Docs: badge set updated (GoReport service retired → pkg.go.dev), artifact counts synced across README/GitHub metadata (358), platform matrix clarified (5 targets, Windows amd64), `--backup-dir` documented
+
 ## [0.5.0] - 2026-08-21
 
 ### Added
@@ -78,7 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Go SDK (`Clean`, `Verify`, `ShredFile`, `Backup`, `Restore`)
 - Docker E2E harness, GitHub Actions CI, golangci-lint
 
-[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/zyrophix/lethe/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/zyrophix/lethe/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zyrophix/lethe/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/zyrophix/lethe/compare/v0.3.0...v0.3.1

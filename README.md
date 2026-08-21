@@ -33,7 +33,7 @@ Cross-platform anti-forensics trace cleaner with risk-gated operations. Written 
 | **REDACT** | Python | Windows only | 255 | aggressive (RAM wipe, BitLocker header nuke) |
 | **BleachBit** | Python | Linux/Windows | — | GUI cleaner, no forensics focus |
 | **ShadowWipe / SATAN2** | C++/Rust | Windows / Linux+Win | — | covers VSS/shellbags **or** adds deception (fake logs) |
-| **Lethe** | **Go** | **Linux/macOS/Windows** | **340** | **risk-gated + backup + verify + 180+ tests + CI** |
+| **Lethe** | **Go** | **Linux/macOS/Windows** | **358** | **risk-gated + backup + verify + 200+ tests + CI** |
 
 Lethe is the only cross-platform, statically-linked, test-covered cleaner with `safe/risky/destructive` gating, backup/restore and a verifiable `verify` step. It closes the Windows gap vs REDACT/ShadowWipe (VSS, Recycle Bin, ShellBags/BagMRU, MUICache, `Windows.edb`, ETW) without going into RAM-wiping or log-forging territory.
 
@@ -42,10 +42,10 @@ Lethe is the only cross-platform, statically-linked, test-covered cleaner with `
 ```sh
 go install github.com/zyrophix/lethe/cmd/lethe@latest
 # pinned version:
-go install github.com/zyrophix/lethe/cmd/lethe@v0.5.0
+go install github.com/zyrophix/lethe/cmd/lethe@v0.5.1
 ```
 
-Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
+Prebuilt binaries for Linux/macOS (amd64 + arm64) and Windows (amd64) — 5 targets — are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
 
 From source:
 
@@ -85,6 +85,7 @@ lethe list
 | `-m, --modules` | comma-separated module list |
 | `-p, --parallel` | run modules concurrently |
 | `-b, --backup` | back up artifacts before cleaning |
+| `--backup-dir` | override backup directory |
 | `-s, --shred` | secure-overwrite before delete |
 | `--timestomp` | randomize timestamps after truncate |
 | `--wipe-free-space` | fill free space to destroy deleted data |
@@ -107,9 +108,9 @@ lethe restore --backup-dir /tmp/lethe-backup-*.tar
 
 | Platform | Modules | Artifacts |
 |----------|---------|-----------|
-| **Linux** (20) | `shell`, `logs`, `audit`, `temp`, `network`, `user`, `package`, `browser`, `ssh`, `container`, `systemd`, `print`, `cicd`, `idsips`, `crypto`, `privacy`, `pentest`, `osint`, `iot`, `ml` | 234 |
-| **macOS** (7) | `shell`, `macos`, `audit`, `browser`, `unified`, `fileevents`, `usage` | 43 |
-| **Windows** (10) | `events`, `history`, `registry`, `filesystem`, `temp`, `security`, `advanced`, `journal`, `pagefile`, `shadows` | 63 |
+| **Linux** (20) | `shell`, `logs`, `audit`, `temp`, `network`, `user`, `package`, `browser`, `ssh`, `container`, `systemd`, `print`, `cicd`, `idsips`, `crypto`, `privacy`, `pentest`, `osint`, `iot`, `ml` | 236 |
+| **macOS** (7) | `shell`, `macos`, `audit`, `browser`, `unified`, `fileevents`, `usage` | 49 |
+| **Windows** (10) | `events`, `history`, `registry`, `filesystem`, `temp`, `security`, `advanced`, `journal`, `pagefile`, `shadows` | 73 |
 
 `events` = `wevtutil cl` for every log; `journal` = `fsutil usn deletejournal`; `pagefile` = `ClearPageFileAtShutdown` + delete; `shadows` = `vssadmin delete shadows /all /quiet`; `registry` includes ShellBags/BagMRU, MUICache, RunMRU, WordWheelQuery, TypedURLs, ComDlg MRUs, USBSTOR, BAM, ShimCache; `filesystem` includes Recycle Bin, `Windows.edb` (locked by `SearchIndexer.exe`), `hiberfil.sys`, ETW `RtBackup`/diagnostic logs, thumbcache.
 
@@ -162,7 +163,7 @@ make e2e               # Docker E2E against root modules (linux)
 
 E2E (`docker/e2e.sh`) builds a hardened Ubuntu container (caps, memory/CPU/pids limits, memory sampler aborting below 2048 MB free) and verifies `ssh`, `audit`, `logs`, `temp` artifacts are removed. Log: `docker/e2e.log`.
 
-CI (`.github/workflows/ci.yml`): `test -race` + `cross-compile` + `integration` + `e2e-docker` + `windows` + `golangci-lint v2`.
+CI (`.github/workflows/ci.yml`): `test -race` + `cross-compile` + `integration` + `e2e-docker` + `windows` + `windows-smoke` + `golangci-lint v2`.
 
 ## Safety notes
 
