@@ -1,6 +1,6 @@
 BINARY    := lethe
-VERSION   := 0.3.0
-LDFLAGS   := -s -w
+VERSION   := 0.3.1
+LDFLAGS   := -s -w -X github.com/zyrophix/lethe/internal/cli.version=$(VERSION)
 PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 
 .PHONY: all build test test-integration vet cross-compile e2e clean

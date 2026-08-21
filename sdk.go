@@ -97,20 +97,20 @@ const (
 
 // Event is a structured log entry emitted by the engine.
 type Event struct {
-	Timestamp time.Time  `json:"ts"`
-	Level     EventLevel `json:"level"`
-	Module    string     `json:"module,omitempty"`
-	Artifact  string     `json:"artifact,omitempty"`
-	Action    string     `json:"action,omitempty"`
-	Risk      RiskLevel  `json:"-"`
-	RiskStr   string     `json:"risk,omitempty"`
-	Message   string     `json:"msg"`
-	DryRun    bool       `json:"dry_run,omitempty"`
+	Timestamp time.Time     `json:"ts"`
+	Level     EventLevel    `json:"level"`
+	Module    string        `json:"module,omitempty"`
+	Artifact  string        `json:"artifact,omitempty"`
+	Action    string        `json:"action,omitempty"`
+	Risk      RiskLevel     `json:"-"`
+	RiskStr   string        `json:"risk,omitempty"`
+	Message   string        `json:"msg"`
+	DryRun    bool          `json:"dry_run,omitempty"`
 	Duration  time.Duration `json:"duration,omitempty"`
-	Cleaned   int        `json:"cleaned,omitempty"`
-	Failed    int        `json:"failed,omitempty"`
-	Skipped   int        `json:"skipped,omitempty"`
-	BackedUp  int        `json:"backed_up,omitempty"`
+	Cleaned   int           `json:"cleaned,omitempty"`
+	Failed    int           `json:"failed,omitempty"`
+	Skipped   int           `json:"skipped,omitempty"`
+	BackedUp  int           `json:"backed_up,omitempty"`
 }
 
 // Logger receives structured events from the cleaner.
@@ -210,7 +210,7 @@ type Options struct {
 	UseShred bool
 	MaxRisk  RiskLevel
 	Modules  []string
-	Logger   Logger   // nil = discard
+	Logger   Logger    // nil = discard
 	AuditLog io.Writer // optional JSON audit sink
 	Advanced *AdvancedOptions
 }
@@ -226,10 +226,10 @@ type Result struct {
 
 // loggerAdapter bridges public Logger to internal output.Writer.
 type loggerAdapter struct {
-	logger   Logger
-	audit    io.Writer
-	mu       sync.Mutex
-	dryRun   bool
+	logger Logger
+	audit  io.Writer
+	mu     sync.Mutex
+	dryRun bool
 }
 
 func newAdapter(logger Logger, audit io.Writer, dryRun bool) *loggerAdapter {
