@@ -343,13 +343,37 @@ func Clean(ctx context.Context, opts Options) (Result, error) {
 	}, nil
 }
 
-// Verify checks that forensic traces were cleaned. Returns true when all artifacts are clean.
+// VerifyResult reports the verification status of a single artifact.
+type VerifyResult struct {
+	Path    string    `json:"path"`
+	Method  string    `json:"method"`
+	Risk    RiskLevel `json:"risk"`
+	Cleaned bool      `json:"cleaned"`
+	Reason  string    `json:"reason,omitempty"`
+}
+
+// Verify checks that forensic traces were cleaned. Returns true when all
+// artifacts are clean. For per-artifact details use VerifyResults.
 func Verify(ctx context.Context, maxRisk RiskLevel, modules []string) (bool, error) {
+	results, err := VerifyResults(ctx, maxRisk, modules)
+	if err != nil {
+		return false, err
+	}
+	for _, r := range results {
+		if !r.Cleaned {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+// VerifyResults verifies artifacts and returns per-artifact results.
+func VerifyResults(ctx context.Context, maxRisk RiskLevel, modules []string) ([]VerifyResult, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	if err := ctx.Err(); err != nil {
-		return false, err
+		return nil, err
 	}
 	if maxRisk == RiskUndefined {
 		maxRisk = RiskRisky
@@ -364,7 +388,7 @@ func Verify(ctx context.Context, maxRisk RiskLevel, modules []string) (bool, err
 		for _, name := range modules {
 			m, ok := registry.GetForPlatform(module.CurrentPlatform(), name)
 			if !ok {
-				return false, fmt.Errorf("unknown module: %s", name)
+				return nil, fmt.Errorf("unknown module: %s", name)
 			}
 			filtered = append(filtered, m)
 		}
@@ -382,23 +406,21 @@ func Verify(ctx context.Context, maxRisk RiskLevel, modules []string) (bool, err
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return false, fmt.Errorf("home directory: %w", err)
+		return nil, fmt.Errorf("home directory: %w", err)
 	}
 
-	// Check context before verify (verify itself is CPU-bound, not cancellable mid-loop yet).
-	select {
-	case <-ctx.Done():
-		return false, ctx.Err()
-	default:
+	internal := engine.VerifyAll(artifacts, platform.UserHomes(homeDir))
+	results := make([]VerifyResult, 0, len(internal))
+	for _, r := range internal {
+		results = append(results, VerifyResult{
+			Path:    r.Artifact.Path,
+			Method:  r.Artifact.Method,
+			Risk:    fromInternalRisk(r.Artifact.GetRisk()),
+			Cleaned: r.Cleaned,
+			Reason:  r.Reason,
+		})
 	}
-
-	results := engine.VerifyAll(artifacts, platform.UserHomes(homeDir))
-	for _, r := range results {
-		if !r.Cleaned {
-			return false, nil
-		}
-	}
-	return true, nil
+	return results, nil
 }
 
 // ShredFile securely overwrites and removes a single file.

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-21
+
+### Added
+- SDK: `VerifyResults(ctx, maxRisk, modules)` returns per-artifact verification results (`Path`, `Method`, `Risk`, `Cleaned`, `Reason`); `Verify` is now a thin wrapper over it
+- Engine: deep cancellation — `wipeFreeSpace` aborts its write loop on `ctx.Done()`, system commands run via `exec.CommandContext`, directory shred checks context between files
+- CI: Windows CLI smoke job (build + `list` + dry-run clean)
+
+### Changed
+- `wipeFreeSpace` is now a method on `Engine` taking `context.Context`
+
 ## [0.3.1] - 2026-08-21
 
 ### Fixed
@@ -55,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Go SDK (`Clean`, `Verify`, `ShredFile`, `Backup`, `Restore`)
 - Docker E2E harness, GitHub Actions CI, golangci-lint
 
-[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/zyrophix/lethe/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/zyrophix/lethe/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/zyrophix/lethe/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/zyrophix/lethe/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zyrophix/lethe/compare/v0.1.0...v0.2.0

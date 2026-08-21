@@ -48,6 +48,21 @@ jobs:
       - run: go build ./...
       - run: go test ./... -race
 
+  windows-smoke:
+    name: Smoke (windows CLI)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.3"
+      - name: Build
+        run: go build -ldflags "-s -w -X github.com/zyrophix/lethe/internal/cli.version=smoke" -o lethe.exe ./cmd/lethe
+      - name: List modules
+        run: ./lethe.exe list
+      - name: Dry-run clean (safe)
+        run: ./lethe.exe clean --dry-run --max-risk safe
+
   e2e-docker:
     name: E2E (Docker root modules)
     runs-on: ubuntu-latest

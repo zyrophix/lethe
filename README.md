@@ -42,7 +42,7 @@ Lethe is the only cross-platform, statically-linked, test-covered cleaner with `
 ```sh
 go install github.com/zyrophix/lethe/cmd/lethe@latest
 # pinned version:
-go install github.com/zyrophix/lethe/cmd/lethe@v0.3.0
+go install github.com/zyrophix/lethe/cmd/lethe@v0.4.0
 ```
 
 Prebuilt binaries for Linux/macOS/Windows (amd64 + arm64) are attached to each [GitHub release](https://github.com/zyrophix/lethe/releases).
@@ -142,6 +142,7 @@ res, err := lethe.Clean(context.Background(), lethe.Options{
     },
 })
 ok, err := lethe.Verify(context.Background(), lethe.RiskSafe, nil)
+results, err := lethe.VerifyResults(context.Background(), lethe.RiskRisky, nil) // per-artifact detail
 err = lethe.ShredFile(context.Background(), "/tmp/secret", 3)
 archive, err := lethe.Backup(context.Background(), "/tmp")
 err = lethe.Restore(context.Background(), "/tmp/backup.tar")

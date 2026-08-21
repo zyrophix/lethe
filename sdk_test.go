@@ -147,6 +147,33 @@ func TestVerifyUnknownModule(t *testing.T) {
 	}
 }
 
+func TestVerifyResultsPerArtifact(t *testing.T) {
+	results, err := VerifyResults(context.Background(), RiskSafe, nil)
+	if err != nil {
+		t.Fatalf("VerifyResults: %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatal("expected at least one result")
+	}
+	for _, r := range results {
+		if r.Path == "" {
+			t.Error("result path should not be empty")
+		}
+		if r.Method == "" {
+			t.Error("result method should not be empty")
+		}
+		if r.Risk != RiskSafe {
+			t.Errorf("risk should be safe (max-risk filter), got %v", r.Risk)
+		}
+	}
+}
+
+func TestVerifyResultsUnknownModule(t *testing.T) {
+	if _, err := VerifyResults(context.Background(), RiskSafe, []string{"no_such_module"}); err == nil {
+		t.Fatal("expected error for unknown module")
+	}
+}
+
 func TestVerifyContextCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

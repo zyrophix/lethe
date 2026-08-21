@@ -43,6 +43,7 @@ type Engine struct {
 	backup     *Backup
 	writer     output.Writer
 	stats      *Stats
+	ctx        context.Context
 	dryRun     bool
 	useShred   bool
 	timestomp  bool
@@ -59,6 +60,7 @@ func New(registry *module.Registry, policy risk.Policy, writer output.Writer, ho
 		policy:   policy,
 		writer:   writer,
 		stats:    &Stats{},
+		ctx:      context.Background(),
 		homeDir:  homeDir,
 		homes:    platform.UserHomes(homeDir),
 	}
@@ -99,6 +101,7 @@ func (e *Engine) Run(ctx context.Context, opts RunOptions) error {
 		return err
 	}
 	start := time.Now()
+	e.ctx = ctx
 	e.dryRun = opts.DryRun
 	e.useShred = opts.UseShred
 	e.timestomp = opts.Timestomp
@@ -208,7 +211,7 @@ func (e *Engine) Run(ctx context.Context, opts RunOptions) error {
 		}
 		e.writer.Warning("wiping free space — this can take a long time")
 		startWipe := time.Now()
-		written, err := wipeFreeSpace(os.TempDir(), -1)
+		written, err := e.wipeFreeSpace(ctx, os.TempDir(), -1)
 		if err != nil {
 			e.writer.Error("wipe failed: " + err.Error())
 		} else {
@@ -421,7 +424,8 @@ func timestompFile(path string) error {
 // wipeFreeSpace fills dir until the filesystem is out of space, then removes
 // the filler file. maxBytes > 0 caps the write (used to emulate a small
 // filesystem in tests). On SSD storage the filler is random; elsewhere zeros.
-func wipeFreeSpace(dir string, maxBytes int64) (int64, error) {
+// The write loop aborts when ctx is cancelled.
+func (e *Engine) wipeFreeSpace(ctx context.Context, dir string, maxBytes int64) (int64, error) {
 	f, err := os.CreateTemp(dir, "lethe-wipe-*")
 	if err != nil {
 		return 0, err
@@ -439,6 +443,12 @@ func wipeFreeSpace(dir string, maxBytes int64) (int64, error) {
 
 	var written int64
 	for {
+		select {
+		case <-ctx.Done():
+			return written, ctx.Err()
+		default:
+		}
+
 		chunk := buf
 		if maxBytes > 0 {
 			remaining := maxBytes - written
@@ -505,6 +515,11 @@ func (e *Engine) shredPath(path string, recursive bool) error {
 			return err
 		}
 		for _, entry := range entries {
+			select {
+			case <-e.ctx.Done():
+				return e.ctx.Err()
+			default:
+			}
 			subPath := filepath.Join(path, entry.Name())
 			if !entry.IsDir() {
 				if err := shred.ShredFile(subPath, 3); err != nil {
@@ -533,7 +548,7 @@ func (e *Engine) runSystemCommand(cmdStr string) error {
 	if len(parts) == 0 {
 		return fmt.Errorf("empty command")
 	}
-	cmd := exec.Command(parts[0], parts[1:]...)
+	cmd := exec.CommandContext(e.ctx, parts[0], parts[1:]...)
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

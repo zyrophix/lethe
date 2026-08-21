@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,7 +10,7 @@ import (
 func TestWipeFreeSpaceCreatesAndRemovesFiller(t *testing.T) {
 	dir := t.TempDir()
 
-	written, err := wipeFreeSpace(dir, 256*1024)
+	written, err := (&Engine{}).wipeFreeSpace(context.Background(), dir, 256*1024)
 	if err != nil {
 		t.Fatalf("wipeFreeSpace: %v", err)
 	}
@@ -30,7 +31,7 @@ func TestWipeFreeSpaceRespectsCap(t *testing.T) {
 	dir := t.TempDir()
 
 	const capBytes = 1024 * 1024
-	written, err := wipeFreeSpace(dir, capBytes)
+	written, err := (&Engine{}).wipeFreeSpace(context.Background(), dir, capBytes)
 	if err != nil {
 		t.Fatalf("wipeFreeSpace: %v", err)
 	}
@@ -40,7 +41,7 @@ func TestWipeFreeSpaceRespectsCap(t *testing.T) {
 }
 
 func TestWipeFreeSpaceMissingDir(t *testing.T) {
-	_, err := wipeFreeSpace(filepath.Join(t.TempDir(), "does-not-exist"), -1)
+	_, err := (&Engine{}).wipeFreeSpace(context.Background(), filepath.Join(t.TempDir(), "does-not-exist"), -1)
 	if err == nil {
 		t.Fatal("expected error for missing dir")
 	}
